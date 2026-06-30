@@ -3,4 +3,4 @@
  * SecurityFilterChain, AuthorizationServerSettings, registered clients, beans.
  * No business logic — framework configuration only.
  */
-package com.pigeonkim.oauth2_authorization_server.config;
+package com.pigeonkim.oauth2authorizationserver.config;

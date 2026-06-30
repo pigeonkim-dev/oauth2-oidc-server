@@ -1,4 +1,4 @@
-package com.pigeonkim.oauth2_authorization_server.domain;
+package com.pigeonkim.oauth2authorizationserver.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

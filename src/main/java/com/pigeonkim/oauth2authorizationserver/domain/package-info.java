@@ -4,4 +4,4 @@
  * VerificationChallenge, and the refresh-token family/row aggregate.
  * As it grows, split into sub-packages: account, credential, verification, token.
  */
-package com.pigeonkim.oauth2_authorization_server.domain;
+package com.pigeonkim.oauth2authorizationserver.domain;

@@ -1,4 +1,4 @@
-package com.pigeonkim.oauth2_authorization_server.domain;
+package com.pigeonkim.oauth2authorizationserver.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Table(name = "credential",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uq_credential_type_email", columnNames = {"type", "email"}),
-                @UniqueConstraint(name = "uq_credential_provider",   columnNames = {"provider", "provider_uid"})
+                @UniqueConstraint(name = "uq_credential_provider", columnNames = {"provider", "provider_uid"})
         })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -44,6 +44,9 @@ public class Credential {
 
     @Column(nullable = true)
     private String providerUid;
+
+    @Column(nullable = false)
+    private boolean emailVerified;
 
     private Credential(Account account, CredentialType type, String email,
                        String passwordHash, String provider, String providerUid) {
@@ -83,6 +86,7 @@ public class Credential {
                     && passwordHash == null;                       // KAKAO는 email 선택 → 조건 없음
         };
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -92,8 +96,13 @@ public class Credential {
 
         return id != null && id.equals(other.id);   // id 없으면 동일성(==)만 인정
     }
+
     @Override
     public int hashCode() {
         return getClass().hashCode();   // 상수 — id 변해도 hashCode 불변 보장
+    }
+
+    public void markEmailVerified() {
+        this.emailVerified = true;
     }
 }

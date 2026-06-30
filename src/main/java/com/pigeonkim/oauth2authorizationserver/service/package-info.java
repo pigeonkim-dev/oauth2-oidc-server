@@ -5,4 +5,4 @@
  * refresh-token reuse detection (CONSUMED re-presented -&gt; revoke whole family),
  * and the nullable-integrity guards for Credential STI gaps.
  */
-package com.pigeonkim.oauth2_authorization_server.service;
+package com.pigeonkim.oauth2authorizationserver.service;
