@@ -49,7 +49,7 @@ refresh_token_family / refresh_token (T4)
 | T1 | Account/Credential STI 도메인 | ✅ 구현·단위테스트·커밋 |
 | T2 | VerificationStrategy + EMAIL + Challenge | ✅ 구현·단위테스트·커밋 |
 | T6 | zonky 통합 테스트 하니스 | ⏸ **보류**(zonky×Boot4.1 호환 — 배포 직전/지원 시 재개) |
-| T3 | LinkingService (양끝 증명, pre-hijacking 차단) | 📐 설계확정, 구현 대기 |
+| T3 | LinkingService (양끝 증명, pre-hijacking 차단) | ✅ 구현·단위테스트·커밋 |
 | T4 | refresh 패밀리 + reuse detection | 대기 |
 | T5 | OAuth2TokenCustomizer 클레임(@EntityGraph) | 대기 |
 | T7 | 토큰 정리 @Scheduled | 대기 |
