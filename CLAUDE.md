@@ -48,7 +48,7 @@ The single source of truth for design is **`docs/`** — start with [`docs/00-ov
 
 ## Architecture & cross-cutting invariants
 
-Layered packages under the base package: `config, domain, repository, service, web, dto, exception` (each has a `package-info.java` describing its role). `web/` and `dto/` are not built yet.
+Layered packages under the base package: `config, domain, repository, service, web, dto, exception`. `web/` and `dto/` are not built yet.
 
 These invariants span multiple files and the design docs — **do not break them**:
 
