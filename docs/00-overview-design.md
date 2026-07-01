@@ -49,7 +49,7 @@ refresh_token_family / refresh_token (T4)
 | T1 | Account/Credential STI 도메인 | ✅ 구현·단위테스트·커밋 |
 | T2 | VerificationStrategy + EMAIL + Challenge | ✅ 구현·단위테스트·커밋 |
 | T6 | zonky 통합 테스트 하니스 | ⏸ **보류**(zonky×Boot4.1 호환 — 배포 직전/지원 시 재개) |
-| T3 | LinkingService (양끝 증명, pre-hijacking 차단) | ▶ 다음 |
+| T3 | LinkingService (양끝 증명, pre-hijacking 차단) | 📐 설계확정, 구현 대기 |
 | T4 | refresh 패밀리 + reuse detection | 대기 |
 | T5 | OAuth2TokenCustomizer 클레임(@EntityGraph) | 대기 |
 | T7 | 토큰 정리 @Scheduled | 대기 |
@@ -64,4 +64,26 @@ refresh_token_family / refresh_token (T4)
 - 이 파일 = 개요
 - [t1-domain-design.md](t1-domain-design.md) — Account/Credential STI
 - [t2-verification-design.md](t2-verification-design.md) — 검증 서브시스템
-- (T3~ 작성 예정)
+- [t3-linking-design.md](t3-linking-design.md) — 계정 연결 + pre-hijacking 차단
+- [t4-token-reuse-detection-design.md](t4-token-reuse-detection-design.md) — refresh 회전 + 도난 탐지 (초안)
+- [t5-token-claims-design.md](t5-token-claims-design.md) — 토큰 클레임 커스터마이저 (초안)
+- [t7-scheduled-cleanup-design.md](t7-scheduled-cleanup-design.md) — 정리 @Scheduled (초안)
+- [t8-indexes-design.md](t8-indexes-design.md) — 인덱스 (초안)
+> T1·T2 = 구현 완료 / T3 = 설계확정 / T4·T5·T7·T8 = 초안(구현 전 정제)
+
+## 8. 백로그 — 미래 Credential 타입 & 인증요소 (v1 밖)
+설계가 *이미 수용*하는 확장점들. 구조를 고치는 게 아니라 타입/채널/레이어를 추가.
+
+**보안 트레이드오프 (왜 필요):** 링크 = OR 로그인이라 "한 수단 뚫리면 전권" 위험(약한 고리). 계정 중심 모델 + 아래 레버로 *가둠*.
+
+| 추가 | 우리 구조에서 정체 | 가치/비고 |
+|---|---|---|
+| **Passkey (WebAuthn)** | 새 Credential 타입(공개키) | ★최고: 피싱불가·공유비밀 없음→약한고리 근본 완화. **앱 불필요**(브라우저). Spring Security 6.4+ 지원. v1 후 1순위 |
+| **Apple 로그인** | OIDC 소셜 Credential(카카오와 동형) | 싸고 자연스러움. private-relay 이메일 quirk |
+| **TOTP MFA** | Account 위 정책 레이어 | 우리 앱 불필요(인증앱). 2단계 |
+| **푸시 MFA** | VerificationStrategy 채널 + 정책 | 네이티브 앱 필요(별도 대형 스코프) |
+| **SMS / 폰번호** | VerificationStrategy(SMS) + contact 식별자 | SIM-스왑 약함→보조 요소로. 폰 컬럼 |
+| **step-up 재인증** | 민감작업(수단 추가/삭제·삭제) 시 재증명 | "한 수단 뚫림→전권"을 "제한적 접근"으로 |
+| **링크 알림** | 새 수단 연결/새 기기 로그인 통지 | 사용자 즉시 반응·차단 |
+
+**방침:** IdP는 **웹 우선**(패스키+TOTP+소셜)으로 멀리 감 — 네이티브 앱 없이 기기기반·강보안 확보. 폰/앱은 그 다음. 척추(T3→T4→T5) 먼저, 이 백로그는 v1 관통 후.
