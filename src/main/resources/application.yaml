@@ -1,3 +1,15 @@
 spring:
   application:
     name: oauth2-authorization-server
+  profiles:
+    default: local            # 로컬 개발 기본 프로필 → application-local.yml 로드
+  jpa:
+    hibernate:
+      ddl-auto: update        # dev: 엔티티 → 테이블 자동 생성 (운영은 Flyway로 교체 예정)
+    open-in-view: false       # OSIV 끔(권장)
+    properties:
+      hibernate:
+        format_sql: true
+logging:
+  level:
+    org.hibernate.SQL: debug  # 생성되는 SQL 눈으로 확인용
