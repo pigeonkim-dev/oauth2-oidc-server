@@ -1,23 +1,5 @@
 # CLAUDE.md
 
-##사용자 스타일
-- 1년자 자바 개발자 신입 수준
-- C# .netframework 4.8, ASP.NET Webforms, ASP.NET MVC 유경험자 12년차 웹개발자
-- 프론트 엔드 조금 알고 있음
-- JAVA BCL 많이 모른다.
-- Spring, Spring Boot 배우는 중
-- Spring JPA 배우는 중
-- JAVA/Spring Boot 기반 웹개발 배우는 중
-
-## 코드 작업 스타일 설명
-- 코드는 전체 코드를 만들어서 제공 하지 말것
-- 클래스는 클래스의 껍데기만 제공
-- 변수는 변수 자료형이랑 이름만 제공
-- 메서드는 메서드의 리턴타입과 시그니처 입력값에 대한 설명만 제공
-- 어노테이션이 필요 하면 클래스, 변수, 메서드에 필요한 어노테이션이 어떤 것이 있고 어떤 역할인지 설명 하고 제공
-- 특별히 요청시 전체 클래스로 제공 하고 코멘트를 써놓는다.
-
-
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What this is
@@ -33,6 +15,9 @@ The single source of truth for design is **`docs/`** — start with [`docs/00-ov
   - starter is `spring-boot-starter-webmvc` (not `-web`); test starters are per-module (`spring-boot-starter-data-jpa-test`, etc.).
   - Test-slice annotations moved: `@DataJpaTest` → `org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest`; `@AutoConfigureTestDatabase` → `org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase` (NOT the old `...boot.test.autoconfigure.*`).
 - `@Transactional` should be the Spring one (`org.springframework.transaction.annotation.Transactional`), not `jakarta.transaction.*`.
+- **Spring Authorization Server is merged into `spring-security-config` 7.1.0** (Boot 4.1 pulls SAS via Security 7, not the standalone 1.x artifact). Two gotchas vs every online SAS 1.x / Boot-3 example:
+  - `OAuth2AuthorizationServerConfigurer` moved to `org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer` (NOT the old `org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.*`).
+  - There is **no static `authorizationServer()` factory** in this version — construct it with `new OAuth2AuthorizationServerConfigurer()`, then use `http.with(configurer, customizer)`. `getEndpointsMatcher()`, `.oidc(...)` are instance methods on it.
 
 ## Commands
 
