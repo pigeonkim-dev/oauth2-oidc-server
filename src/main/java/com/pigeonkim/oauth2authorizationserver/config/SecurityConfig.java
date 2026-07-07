@@ -1,0 +1,122 @@
+package com.pigeonkim.oauth2authorizationserver.config;
+
+// TODO import: OAuth2AuthorizationServerConfigurer, AuthorizationServerSettings,
+//              Customizer, LoginUrlAuthenticationEntryPoint, MediaType,
+//              MediaTypeRequestMatcher, SecurityFilterChain, HttpSecurity ...
+
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.UUID;
+
+@Configuration
+@EnableWebSecurity                 // 필터체인 커스터마이즈할 거라 명시
+public class SecurityConfig {
+
+    @Bean
+    @Order(1)                      // ← SAS 프로토콜 엔드포인트 전용 체인 (먼저 매칭)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
+            throws Exception {
+
+        OAuth2AuthorizationServerConfigurer authorizationServer =
+                new OAuth2AuthorizationServerConfigurer(); // 2.0 팩토리
+
+        http
+                // (1) 이 체인이 낚아챌 경로 = SAS 엔드포인트들의 matcher
+                .securityMatcher(
+                        authorizationServer.getEndpointsMatcher()
+                )
+                // (2) 설정자 장착 + OIDC 켜기
+                .with(authorizationServer, (server) -> server
+                        .oidc(Customizer.withDefaults())          // OpenID Connect 1.0 on
+                )
+                // (3) 이 체인의 모든 요청은 인증 필요
+                .authorizeHttpRequests(a -> a.anyRequest().authenticated())
+                // (4) 브라우저(text/html) 미인증 → /login 으로 리다이렉트
+                .exceptionHandling(e -> e.defaultAuthenticationEntryPointFor(
+                        new LoginUrlAuthenticationEntryPoint("/login"),
+                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+                ));
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)                      // ← 나머지 전부: 폼 로그인
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
+            throws Exception {
+        http
+                .authorizeHttpRequests(a -> a.anyRequest().authenticated())
+                .formLogin(Customizer.withDefaults());        // 기본 로그인 폼
+        return http.build();
+    }
+
+    @Bean
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder().build();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(PasswordEncoder encoder) {   // ← 우리 BCrypt 빈 주입
+        UserDetails user = User.withUsername("user")
+                .password(encoder.encode("p@ssW0rd") )   // BCrypt 인코더로 해시해서 저장
+                .roles("USER")
+                .build();
+        return new InMemoryUserDetailsManager(user);
+    }
+
+    @Bean
+    public RegisteredClientRepository registeredClientRepository() {
+        RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("demo-client")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE) // 공개 SPA=시크릿 없음
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri("http://127.0.0.1:3000/callback")     // 더미 SPA 콜백(임시)
+                .scope(OidcScopes.OPENID)
+                .build();
+        return new InMemoryRegisteredClientRepository(client);
+    }
+
+    @Bean
+    public JWKSource<SecurityContext> jwkSource() throws Exception {
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+        gen.initialize(2048);
+        KeyPair kp = gen.generateKeyPair();
+        RSAKey rsaKey = new RSAKey.Builder((RSAPublicKey) kp.getPublic())
+                .privateKey((RSAPrivateKey) kp.getPrivate())
+                .keyID(UUID.randomUUID().toString())
+                .build();
+        return new ImmutableJWKSet<>(new JWKSet(rsaKey));
+    }
+
+}
