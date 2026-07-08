@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.server.authorization.client.InMemoryR
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -89,7 +90,7 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {   // ← 우리 BCrypt 빈 주입
         UserDetails user = User.withUsername("user")
-                .password(encoder.encode("p@ssW0rd") )   // BCrypt 인코더로 해시해서 저장
+                .password(encoder.encode("/") )   // BCrypt 인코더로 해시해서 저장
                 .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
@@ -101,8 +102,14 @@ public class SecurityConfig {
                 .clientId("demo-client")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE) // 공개 SPA=시크릿 없음
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri("http://127.0.0.1:3000/callback")     // 더미 SPA 콜백(임시)
                 .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
+                .clientSettings(ClientSettings.builder()
+                        .requireProofKey(true)              // ③ PKCE 필수 명시
+                        .requireAuthorizationConsent(true)  // ④ 구글식 동의 화면 켜기
+                        .build())
                 .build();
         return new InMemoryRegisteredClientRepository(client);
     }
