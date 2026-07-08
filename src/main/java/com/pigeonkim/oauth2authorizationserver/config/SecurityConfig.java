@@ -9,6 +9,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -34,8 +35,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
@@ -90,7 +94,7 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {   // ← 우리 BCrypt 빈 주입
         UserDetails user = User.withUsername("user")
-                .password(encoder.encode("/") )   // BCrypt 인코더로 해시해서 저장
+                .password(encoder.encode("/"))   // BCrypt 인코더로 해시해서 저장
                 .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
@@ -115,15 +119,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JWKSource<SecurityContext> jwkSource() throws Exception {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-        gen.initialize(2048);
-        KeyPair kp = gen.generateKeyPair();
-        RSAKey rsaKey = new RSAKey.Builder((RSAPublicKey) kp.getPublic())
-                .privateKey((RSAPrivateKey) kp.getPrivate())
-                .keyID(UUID.randomUUID().toString())
-                .build();
-        return new ImmutableJWKSet<>(new JWKSet(rsaKey));
+    public JWKSource<SecurityContext> jwkSource(
+            @Value("${app.jwk.keystore}") String keystorePath,
+            @Value("${app.jwk.alias}") String alias,
+            @Value("${app.jwk.password}") String password) throws Exception {
+
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");           // ① 키스토어 타입
+        try (InputStream in = new FileInputStream(keystorePath)) {    // ② 파일 열기
+            keyStore.load(in, password.toCharArray());   // ③ 키스토어 언락
+        }
+
+        RSAKey rsaKey = RSAKey.load(keyStore, alias, password.toCharArray()); // ④ 키 꺼내기
+
+        return new ImmutableJWKSet<>(new JWKSet(rsaKey));             // ⑤ 이전과 동일
     }
 
 }
