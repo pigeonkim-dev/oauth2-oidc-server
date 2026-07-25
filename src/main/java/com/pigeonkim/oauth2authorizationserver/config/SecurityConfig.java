@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,6 +26,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -102,7 +105,7 @@ public class SecurityConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
+        RegisteredClient client = RegisteredClient.withId("11111111-1111-1111-1111-111111111111")
                 .clientId("demo-client")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE) // 공개 SPA=시크릿 없음
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
@@ -133,5 +136,13 @@ public class SecurityConfig {
 
         return new ImmutableJWKSet<>(new JWKSet(rsaKey));             // ⑤ 이전과 동일
     }
+    @Bean
+    public OAuth2AuthorizationService authorizationService(
+            JdbcTemplate jdbcTemplate,
+            RegisteredClientRepository registeredClientRepository) {
+
+        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+    }
+
 
 }
