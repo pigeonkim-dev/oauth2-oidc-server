@@ -9,6 +9,8 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.pigeonkim.oauth2authorizationserver.repository.JpaOAuth2AuthorizationRepository;
+import com.pigeonkim.oauth2authorizationserver.service.JpaOAuth2AuthorizationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -138,10 +140,9 @@ public class SecurityConfig {
     }
     @Bean
     public OAuth2AuthorizationService authorizationService(
-            JdbcTemplate jdbcTemplate,
+            JpaOAuth2AuthorizationRepository repository,       // JdbcTemplate → 우리 리포지토리
             RegisteredClientRepository registeredClientRepository) {
-
-        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+        return new JpaOAuth2AuthorizationService(repository, registeredClientRepository);  // Jdbc → Jpa
     }
 
 
