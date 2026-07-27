@@ -87,7 +87,8 @@ public class SecurityConfig {
             throws Exception {
         http
                 .authorizeHttpRequests(a -> a.anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults());        // 기본 로그인 폼
+                .formLogin(Customizer.withDefaults()) // 기본 로그인 폼
+                .oauth2Login(Customizer.withDefaults());
         return http.build();
     }
 
