@@ -21,7 +21,6 @@ public class RefreshTokenFamily {
     private RefreshTokenFamilyStatus status;
 
     private Instant createdAt;
-    private static RefreshTokenFamilyStatus RefreshTokenFamilyStatus;
 
     protected RefreshTokenFamily() { }   // JPA용
 
@@ -42,6 +41,4 @@ public class RefreshTokenFamily {
         // TODO: status=REVOKED  (이미 REVOKED면 멱등 처리할지 결정)
         this.status = RefreshTokenFamilyStatus.REVOKED;
     }
-
-    // TODO: 필요한 getter (id, status 등)
 }

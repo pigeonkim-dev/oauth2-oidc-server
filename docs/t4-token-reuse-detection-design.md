@@ -50,7 +50,13 @@ family:        ACTIVE ──reuse detected──> REVOKED
 ## 8. NOT in scope (v1)
 - 멀티 클라이언트별 정교한 정책, 디바이스 바인딩(백로그 참조)
 
-## 9. 정제 시 결정할 것
-- reuse-detection 끼우는 위치(커스텀 AuthorizationService vs 필터)
-- refresh 저장을 SAS 기본 테이블에 얹을지, 우리 family/row를 별도로 둘지
-- 동시성 메커니즘(@Version vs unique 제약)
+## 9. 정제 결과 (2026-07-28 확정)
+- **동시성**: `@Version` 낙관적 잠금(`refresh_token.version`) 채택. unique 제약 대신. 진짜 동시 요청 2건 중 한쪽이 튕기는지의 *행위* 테스트는 T6(통합) 영역 — 지금은 컬럼+기전 배선까지만(부팅 로그로 검증).
+- **끼우는 위치**: SAS `OAuth2RefreshTokenAuthenticationProvider`(**final**)를 delegate로 감싼 래퍼 `AuthenticationProvider`. `tokenEndpoint.authenticationProviders(list -> ...)`로 기본 provider를 찾아 교체. → `config/ReuseDetectingRefreshTokenAuthenticationProvider`.
+- **저장 위치**: SAS 기본 테이블에 얹지 않고 **우리 `refresh_token`/`refresh_token_family`를 별도 원장**으로. 이유: SAS는 회전 시 옛 refresh 값을 덮어써 지우므로(재사용 흔적 소멸) **우리 원장이 유일한 진실의 원천**. `jti`(PK)= 불투명 refresh 토큰 값 그 자체.
+- **탐지/기록 분리**: BEFORE=`assertNotReused`(CONSUMED 재제시면 `revokeFamily`+예외), AFTER=`rotate`(옛것 CONSUMED + 새것 ACTIVE 기록). 도메인 예외 `RefreshTokenReuseException`은 래퍼에서 `OAuth2AuthenticationException(invalid_grant)`로 변환(역할 분리).
+
+## 10. 남은 배선 (M4 Account 연결 후 활성화)
+- **초기 발급 refresh 기록**: 로그인 직후 SAS가 주는 첫 refresh는 원장에 없음 → v1은 "첫 회전 때 입양(adopt)"(없으면 그 자리서 family 생성+기록)로 처리 예정. 한계: *맨 첫 refresh가 첫 회전 전에 도난·재사용되면 미탐지* — 문서화하고 감수.
+- **`accountId` 매핑**: `family.accountId`(Account PK)는 현재 로그인 principal이 데모 인메모리 `user`라 확정 불가 → 로그인을 Account 도메인으로 back한 뒤(M4) 연결.
+- **래퍼 BEFORE/AFTER 훅 실제 호출** + 예외 변환은 위 두 개가 풀린 뒤 켠다. 현재 래퍼는 등록만 되고 위임만 함(inert).

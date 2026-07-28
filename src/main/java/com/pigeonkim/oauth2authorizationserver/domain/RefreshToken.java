@@ -24,6 +24,9 @@ public class RefreshToken {
     private Instant issuedAt;
     private Instant expiresAt;
 
+    @Version
+    private long version;
+
     protected RefreshToken() {
     }
 
@@ -47,8 +50,7 @@ public class RefreshToken {
         //   그 신호를 서비스가 받아 family.revoke()를 호출하게 됨 (서비스는 다음 세션)
         //   정상이면 status=CONSUMED
 
-        if (status != RefreshTokenStatus.ACTIVE &&
-        status == RefreshTokenStatus.CONSUMED) {
+        if (status != RefreshTokenStatus.ACTIVE) {
             throw new IllegalStateException("RefreshToken is not active");
         }
 

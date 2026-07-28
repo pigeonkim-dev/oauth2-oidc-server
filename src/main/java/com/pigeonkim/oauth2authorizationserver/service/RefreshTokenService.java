@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 public class RefreshTokenService {
@@ -41,7 +42,7 @@ public class RefreshTokenService {
 
         familyRepo.save(refreshTokenFamily);
 
-        RefreshToken refreshToken = RefreshToken.issue(refreshTokenFamily, jti, Instant.now(), expiresAt);
+        RefreshToken refreshToken = RefreshToken.issue(refreshTokenFamily, jti, clock.instant(), expiresAt);
         tokenRepo.save(refreshToken);
 
         return refreshToken;
@@ -97,5 +98,28 @@ public class RefreshTokenService {
         family.revoke();
         tokenRepo.findByFamily(family)
                 .forEach(RefreshToken::revoke);
+    }
+
+    @Transactional(noRollbackFor = RefreshTokenReuseException.class)
+    public void assertNotReused(String presentedJti) {
+        // TODO:
+        //  tokenRepo.findById(presentedJti) 로 조회해서
+        //    - 비어있음(대장부에 없음) → return (초기발급 토큰 등. 아래 '남은 TODO' 참고)
+        //    - CONSUMED → revokeFamily(해당 family) + throw new RefreshTokenReuseException(presentedJti)
+        //    - 그 외(ACTIVE 등) → return
+
+        Optional<RefreshToken> refreshToken = tokenRepo.findById(presentedJti);
+
+        if (refreshToken.isEmpty()) {
+            return;
+        }
+
+        if (refreshToken.get().getStatus() == RefreshTokenStatus.CONSUMED) {
+            revokeFamily(refreshToken.get().getFamily());
+
+            throw new RefreshTokenReuseException(presentedJti);
+        }
+
+        return;
     }
 }

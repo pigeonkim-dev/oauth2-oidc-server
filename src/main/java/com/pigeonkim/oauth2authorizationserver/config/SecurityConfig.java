@@ -11,6 +11,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.pigeonkim.oauth2authorizationserver.repository.JpaOAuth2AuthorizationRepository;
 import com.pigeonkim.oauth2authorizationserver.service.JpaOAuth2AuthorizationService;
+import com.pigeonkim.oauth2authorizationserver.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,11 +31,13 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -55,7 +58,8 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)                      // ← SAS 프로토콜 엔드포인트 전용 체인 (먼저 매칭)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http,
+                                                                      RefreshTokenService refreshTokenService)
             throws Exception {
 
         OAuth2AuthorizationServerConfigurer authorizationServer =
@@ -68,7 +72,19 @@ public class SecurityConfig {
                 )
                 // (2) 설정자 장착 + OIDC 켜기
                 .with(authorizationServer, (server) -> server
-                        .oidc(Customizer.withDefaults())          // OpenID Connect 1.0 on
+                        .oidc(Customizer.withDefaults())
+                        .tokenEndpoint(tokenEndpoint -> tokenEndpoint
+                                .authenticationProviders(providers -> {
+                                            for (int i = 0; i < providers.size(); i++) {
+                                                if (providers.get(i)
+                                                    instanceof OAuth2RefreshTokenAuthenticationProvider){
+                                                    providers.set(i,
+                                                            new ReuseDetectingRefreshTokenAuthenticationProvider(
+                                                                    providers.get(i), refreshTokenService));
+                                                }
+                                            }
+                                        }
+                                ))
                 )
                 // (3) 이 체인의 모든 요청은 인증 필요
                 .authorizeHttpRequests(a -> a.anyRequest().authenticated())
@@ -120,6 +136,9 @@ public class SecurityConfig {
                         .requireProofKey(true)              // ③ PKCE 필수 명시
                         .requireAuthorizationConsent(true)  // ④ 구글식 동의 화면 켜기
                         .build())
+                .tokenSettings(TokenSettings.builder()
+                        .reuseRefreshTokens(false)      // ★ 이게 회전 스위치 — 켜야 새 refresh 발급 → 우리 rotate 호출됨
+                        .build())
                 .build();
         return new InMemoryRegisteredClientRepository(client);
     }
@@ -139,6 +158,7 @@ public class SecurityConfig {
 
         return new ImmutableJWKSet<>(new JWKSet(rsaKey));             // ⑤ 이전과 동일
     }
+
     @Bean
     public OAuth2AuthorizationService authorizationService(
             JpaOAuth2AuthorizationRepository repository,       // JdbcTemplate → 우리 리포지토리

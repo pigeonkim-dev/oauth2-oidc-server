@@ -2,7 +2,6 @@ package com.pigeonkim.oauth2authorizationserver.service;
 
 import com.pigeonkim.oauth2authorizationserver.domain.JpaOAuth2Authorization;
 import com.pigeonkim.oauth2authorizationserver.repository.JpaOAuth2AuthorizationRepository;
-import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.jackson.SecurityJacksonModules;
@@ -87,57 +86,57 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
     }
 
     // ───────── 변환: 쓰기 (SAS객체 → 엔티티) ─────────
-    private JpaOAuth2Authorization toEntity(OAuth2Authorization a) {
-        JpaOAuth2Authorization e = new JpaOAuth2Authorization();
-        e.setId(a.getId());
-        e.setRegisteredClientId(a.getRegisteredClientId());
-        e.setPrincipalName(a.getPrincipalName());
-        e.setAuthorizationGrantType(a.getAuthorizationGrantType().getValue());
-        e.setAuthorizedScopes(StringUtils.collectionToDelimitedString(a.getAuthorizedScopes(), ","));
-        e.setAttributes(writeMap(a.getAttributes()));
-        e.setState(a.getAttribute(OAuth2ParameterNames.STATE));   // state는 attributes 안에 들어있음
+    private JpaOAuth2Authorization toEntity(OAuth2Authorization oAuth2Authorization) {
+        JpaOAuth2Authorization jpaOAuth2Authorization = new JpaOAuth2Authorization();
+        jpaOAuth2Authorization.setId(oAuth2Authorization.getId());
+        jpaOAuth2Authorization.setRegisteredClientId(oAuth2Authorization.getRegisteredClientId());
+        jpaOAuth2Authorization.setPrincipalName(oAuth2Authorization.getPrincipalName());
+        jpaOAuth2Authorization.setAuthorizationGrantType(oAuth2Authorization.getAuthorizationGrantType().getValue());
+        jpaOAuth2Authorization.setAuthorizedScopes(StringUtils.collectionToDelimitedString(oAuth2Authorization.getAuthorizedScopes(), ","));
+        jpaOAuth2Authorization.setAttributes(writeMap(oAuth2Authorization.getAttributes()));
+        jpaOAuth2Authorization.setState(oAuth2Authorization.getAttribute(OAuth2ParameterNames.STATE));   // state는 attributes 안에 들어있음
 
         // ── 패턴 예시: authorization_code 블록 (이건 제가 채움) ──
-        OAuth2Authorization.Token<OAuth2AuthorizationCode> code = a.getToken(OAuth2AuthorizationCode.class);
+        OAuth2Authorization.Token<OAuth2AuthorizationCode> code = oAuth2Authorization.getToken(OAuth2AuthorizationCode.class);
         if (code != null) {
-            e.setAuthorizationCodeValue(code.getToken().getTokenValue());
-            e.setAuthorizationCodeIssuedAt(code.getToken().getIssuedAt());
-            e.setAuthorizationCodeExpiresAt(code.getToken().getExpiresAt());
-            e.setAuthorizationCodeMetadata(writeMap(code.getMetadata()));
+            jpaOAuth2Authorization.setAuthorizationCodeValue(code.getToken().getTokenValue());
+            jpaOAuth2Authorization.setAuthorizationCodeIssuedAt(code.getToken().getIssuedAt());
+            jpaOAuth2Authorization.setAuthorizationCodeExpiresAt(code.getToken().getExpiresAt());
+            jpaOAuth2Authorization.setAuthorizationCodeMetadata(writeMap(code.getMetadata()));
         }
 
-        OAuth2Authorization.Token<OAuth2AccessToken> accessToken = a.getToken(OAuth2AccessToken.class);
+        OAuth2Authorization.Token<OAuth2AccessToken> accessToken = oAuth2Authorization.getToken(OAuth2AccessToken.class);
         if (accessToken != null) {
-            e.setAccessTokenType(accessToken.getToken().getTokenType().getValue());
+            jpaOAuth2Authorization.setAccessTokenType(accessToken.getToken().getTokenType().getValue());
 
             if (!accessToken.getToken().getScopes().isEmpty()) {
-                e.setAccessTokenScopes(
+                jpaOAuth2Authorization.setAccessTokenScopes(
                         StringUtils.collectionToDelimitedString(accessToken.getToken().getScopes(), ","));
             }
 
-            e.setAccessTokenValue(accessToken.getToken().getTokenValue());
-            e.setAccessTokenIssuedAt(accessToken.getToken().getIssuedAt());
-            e.setAccessTokenExpiresAt(accessToken.getToken().getExpiresAt());
-            e.setAccessTokenMetadata(writeMap(accessToken.getMetadata()));
+            jpaOAuth2Authorization.setAccessTokenValue(accessToken.getToken().getTokenValue());
+            jpaOAuth2Authorization.setAccessTokenIssuedAt(accessToken.getToken().getIssuedAt());
+            jpaOAuth2Authorization.setAccessTokenExpiresAt(accessToken.getToken().getExpiresAt());
+            jpaOAuth2Authorization.setAccessTokenMetadata(writeMap(accessToken.getMetadata()));
         }
 
-       OAuth2Authorization.Token<OAuth2RefreshToken> refreshToken = a.getRefreshToken();
+       OAuth2Authorization.Token<OAuth2RefreshToken> refreshToken = oAuth2Authorization.getRefreshToken();
         if (refreshToken != null){
-            e.setRefreshTokenValue(refreshToken.getToken().getTokenValue());
-            e.setRefreshTokenIssuedAt(refreshToken.getToken().getIssuedAt());
-            e.setRefreshTokenExpiresAt(refreshToken.getToken().getExpiresAt());
-            e.setRefreshTokenMetadata(writeMap(refreshToken.getMetadata()));
+            jpaOAuth2Authorization.setRefreshTokenValue(refreshToken.getToken().getTokenValue());
+            jpaOAuth2Authorization.setRefreshTokenIssuedAt(refreshToken.getToken().getIssuedAt());
+            jpaOAuth2Authorization.setRefreshTokenExpiresAt(refreshToken.getToken().getExpiresAt());
+            jpaOAuth2Authorization.setRefreshTokenMetadata(writeMap(refreshToken.getMetadata()));
         }
 
-        OAuth2Authorization.Token<OidcIdToken> oidcIdToken = a.getToken(OidcIdToken.class);
+        OAuth2Authorization.Token<OidcIdToken> oidcIdToken = oAuth2Authorization.getToken(OidcIdToken.class);
         if (oidcIdToken != null) {
-            e.setOidcIdTokenValue(oidcIdToken.getToken().getTokenValue());
-            e.setOidcIdTokenIssuedAt(oidcIdToken.getToken().getIssuedAt());
-            e.setOidcIdTokenExpiresAt(oidcIdToken.getToken().getExpiresAt());
-            e.setOidcIdTokenMetadata(writeMap(oidcIdToken.getMetadata()));
+            jpaOAuth2Authorization.setOidcIdTokenValue(oidcIdToken.getToken().getTokenValue());
+            jpaOAuth2Authorization.setOidcIdTokenIssuedAt(oidcIdToken.getToken().getIssuedAt());
+            jpaOAuth2Authorization.setOidcIdTokenExpiresAt(oidcIdToken.getToken().getExpiresAt());
+            jpaOAuth2Authorization.setOidcIdTokenMetadata(writeMap(oidcIdToken.getMetadata()));
         }
 
-        return e;
+        return jpaOAuth2Authorization;
     }
 
     // ───────── 변환: 읽기 (엔티티 → SAS객체) ─────────
@@ -194,7 +193,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
         }
 
         if (StringUtils.hasText(jpaOAuth2Authorization.getOidcIdTokenValue())) {
-            Map md = parseMap(jpaOAuth2Authorization.getOidcIdTokenMetadata());
+            Map<String, Object> md = parseMap(jpaOAuth2Authorization.getOidcIdTokenMetadata());
             Map claims = (Map) md.get(OAuth2Authorization.Token.CLAIMS_METADATA_NAME);
 
             OidcIdToken oidcIdToken = new OidcIdToken(
