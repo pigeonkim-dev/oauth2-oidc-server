@@ -9,6 +9,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.pigeonkim.oauth2authorizationserver.repository.AccountRepository;
 import com.pigeonkim.oauth2authorizationserver.repository.JpaOAuth2AuthorizationRepository;
 import com.pigeonkim.oauth2authorizationserver.service.JpaOAuth2AuthorizationService;
 import com.pigeonkim.oauth2authorizationserver.service.RefreshTokenService;
@@ -31,6 +32,7 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -38,6 +40,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -77,7 +81,7 @@ public class SecurityConfig {
                                 .authenticationProviders(providers -> {
                                             for (int i = 0; i < providers.size(); i++) {
                                                 if (providers.get(i)
-                                                    instanceof OAuth2RefreshTokenAuthenticationProvider){
+                                                        instanceof OAuth2RefreshTokenAuthenticationProvider) {
                                                     providers.set(i,
                                                             new ReuseDetectingRefreshTokenAuthenticationProvider(
                                                                     providers.get(i), refreshTokenService));
@@ -166,5 +170,34 @@ public class SecurityConfig {
         return new JpaOAuth2AuthorizationService(repository, registeredClientRepository);  // Jdbc → Jpa
     }
 
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer(AccountRepository accountRepository) {
+        return context -> {
+            // (1) 액세스 토큰일 때만 손댄다 (id_token/refresh 는 제외)
+            if (!OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+                return;
+            }
+
+            // (2) principal → accountId 매핑
+            //   TODO(M4): 지금 로그인 principal 은 데모 인메모리 user 라 우리 Account 로 못 잇는다.
+            //             로그인을 Account 로 back 한 뒤(M4) 여기서 accountId 를 얻는다.
+            Long accountId = null;   // ← M4 전엔 null (아래 (3)에서 안전하게 스킵)
+            if (accountId == null) {
+                return;              // 못 얻으면 클레임 없이 통과 — 토큰 발급 자체는 정상
+            }
+
+            // (3) Account + credentials 를 한 쿼리로 로드해서 클레임 싣기
+            // TODO: accountRepository.findWithCredentialsById(accountId).ifPresent(account -> {
+            //           context.getClaims().claim("name", account.getDisplayName());
+            //           context.getClaims().claim("account_id", account.getId());
+            //           // (옵션) providers: account.getCredentials() 의 type 들
+            //       });
+
+            accountRepository.findWithCredentialsById(accountId).ifPresent(account -> {
+                context.getClaims().claim("name", account.getDisplayName());
+                context.getClaims().claim("account_id", account.getId());
+            });
+        };
+    }
 
 }
