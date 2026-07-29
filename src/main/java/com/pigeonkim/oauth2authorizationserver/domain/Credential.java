@@ -69,11 +69,11 @@ public class Credential {
         return new Credential(account, CredentialType.EMAIL_PASSWORD, email, passwordHash, null, null);
     }
 
-    // ✅ KAKAO 전용 진입로 — provider/providerUid 강제, password는 못 넣음
-    public static Credential kakao(Account account, String email, String provider, String providerUid) {
+    // ✅ 소셜 로그인 공통 진입로 — provider/providerUid 강제, password는 못 넣음 (kakao/google/naver…)
+    public static Credential oauth(Account account, String email, String provider, String providerUid) {
         if (provider == null || providerUid == null)
-            throw new IllegalArgumentException("KAKAO requires provider and providerUid");
-        return new Credential(account, CredentialType.KAKAO, email, null, provider, providerUid);
+            throw new IllegalArgumentException("OAUTH requires provider and providerUid");
+        return new Credential(account, CredentialType.OAUTH, email, null, provider, providerUid);
     }
 
     @AssertTrue(message = "credential type/field combination is invalid")
@@ -82,8 +82,8 @@ public class Credential {
         return switch (type) {
             case EMAIL_PASSWORD -> email != null && passwordHash != null
                     && provider == null && providerUid == null;   // BASIC은 email=식별자라 필수
-            case KAKAO -> providerUid != null && provider != null
-                    && passwordHash == null;                       // KAKAO는 email 선택 → 조건 없음
+            case OAUTH -> providerUid != null && provider != null
+                    && passwordHash == null;                       // 소셜은 email 선택 → 조건 없음
         };
     }
 

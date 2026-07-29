@@ -104,7 +104,7 @@ public class VerificationService {
 
     private String generateCode() {
         StringBuilder sb = new StringBuilder(6);
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 18; i++) {
             sb.append(ALPHABET[RANDOM.nextInt(ALPHABET.length)]);   // 모듈로 편향 없음
         }
         return sb.toString();

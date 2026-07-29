@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,7 +29,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
-import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
@@ -49,12 +47,7 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.UUID;
 
 @Configuration
 @EnableWebSecurity                 // 필터체인 커스터마이즈할 거라 명시
@@ -91,7 +84,8 @@ public class SecurityConfig {
                                 ))
                 )
                 // (3) 이 체인의 모든 요청은 인증 필요
-                .authorizeHttpRequests(a -> a.anyRequest().authenticated())
+                .authorizeHttpRequests(a ->
+                        a.anyRequest().authenticated())
                 // (4) 브라우저(text/html) 미인증 → /login 으로 리다이렉트
                 .exceptionHandling(e -> e.defaultAuthenticationEntryPointFor(
                         new LoginUrlAuthenticationEntryPoint("/login"),
@@ -106,7 +100,10 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
             throws Exception {
         http
-                .authorizeHttpRequests(a -> a.anyRequest().authenticated())
+                .authorizeHttpRequests(a ->
+                        a.requestMatchers("/api/signup/**").permitAll()
+                                .anyRequest().authenticated())
+                .csrf(c -> c.ignoringRequestMatchers("/api/**"))
                 .formLogin(Customizer.withDefaults()) // 기본 로그인 폼
                 .oauth2Login(Customizer.withDefaults());
         return http.build();

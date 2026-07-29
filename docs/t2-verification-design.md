@@ -132,6 +132,14 @@ interface VerificationStrategy {
 - 디스패치: Spring이 `List<VerificationStrategy>` 주입 → `channel()` 키로 `Map` 구성.
   새 채널 = 인터페이스 구현만 추가(OCP).
 
+### 운영 발송 서비스 결정 (2026-07-29, AWS 우선)
+| 채널 | 서비스 | 연동 | 상태 |
+|---|---|---|---|
+| EMAIL | **AWS SES** | SMTP 엔드포인트 → 기존 `JavaMailSender` 그대로(`spring.mail.*`만 세팅). 발신 도메인 verify + 샌드박스→프로덕션 요청 필요. 리전 ap-northeast-2. | **확정** |
+| SMS | **AWS SNS** | AWS SDK(`software.amazon.awssdk:sns`)로 `SmsVerificationStrategy` 스텁 대체 | **잠정** — ⚠️ 한국(+82) A2P 발신번호 사전등록/규제로 도달성 확인 후 최종결정(대안: NHN Cloud/알리고/카카오 알림톡). SMS는 MFA용 미래 채널이라 v1 비필수. |
+
+- 자격증명(SES SMTP user/pass, AWS 키)은 **`application-local.yml`(gitignore)** — `application.yaml` 금지.
+
 ## 7. VerificationService — 글루
 
 `Clock` 주입(`clock.instant()`로 now 획득 → 테스트에서 `Clock.fixed`로 고정).

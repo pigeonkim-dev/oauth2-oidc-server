@@ -28,4 +28,10 @@ public class Account {
 
     @OneToMany(mappedBy = "account")     // ★ mappedBy 가 핵심
     private List<Credential> credentials = new ArrayList<>();
+
+    public  static  Account of(String displayName){
+        Account account = new Account();
+        account.displayName = displayName;
+        return account;
+    }
 }

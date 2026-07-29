@@ -1,0 +1,44 @@
+### 이 파일 사용법
+# IntelliJ: 각 요청 왼쪽 ▶️(초록 삼각형) 클릭 → 실행/응답 확인
+# VS Code: "REST Client" 확장 설치 후 "Send Request" 클릭
+# 검증 코드는 서버 콘솔 로그에 찍힘(EmailVerificationStrategy dev 모드) → 복사해서 아래 code 에 붙여넣기
+
+@host = http://localhost:8080
+
+### 1) 회원가입 — Account+Credential 생성 + 검증코드 발급(로그로 출력)
+POST {{host}}/api/signup
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "displayName": "테스트유저"
+}
+
+### 2) 이메일 검증 — 위 서버 로그에 찍힌 코드를 code 에 넣고 실행
+POST {{host}}/api/signup/verify-email
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "code": "코드를_여기에"
+}
+
+### 3) (검증용) 검증 실패 케이스 — 틀린 코드 → 400 확인
+POST {{host}}/api/signup/verify-email
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "code": "WRONG1"
+}
+
+### 4) (검증용) 잘못된 입력 — @Valid 발동해서 400 확인 (이메일 형식 X, 비번 짧음)
+POST {{host}}/api/signup
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "123",
+  "displayName": ""
+}

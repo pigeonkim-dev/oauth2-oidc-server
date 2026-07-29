@@ -52,7 +52,7 @@ public class LinkingService {
         }
 
         credentialRepo.save(
-                Credential.kakao(credential.getAccount(), proven.email(),
+                Credential.oauth(credential.getAccount(), proven.email(),
                         proven.provider(), proven.providerUid()));
 
 
