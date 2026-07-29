@@ -96,7 +96,7 @@ private 생성자 + `@NoArgsConstructor(PROTECTED)`. codeHash는 이미 해시�
 
 ## 5. OTP 무차별 대입 방어 (★보안 핵심)
 
-6자리 숫자 = 10^6. **시간 + 최대횟수 이중 방어**:
+8자리 영숫자(혼동문자 0/O·1/I/L 제외 30종) = 30^8 ≈ 6.6×10^11. **시간 + 최대횟수 이중 방어**:
 
 ```
 verify(account, channel, purpose, rawCode):
@@ -147,7 +147,7 @@ interface VerificationStrategy {
 ```
 issue(account, channel, purpose):
   1) 기존 PENDING(account,channel,purpose) 전부 supersede()        // 정책1
-  2) rawCode = 난수 6자리   (메모리에만)
+  2) rawCode = 난수 8자리 영숫자   (메모리에만)
   3) codeHash = passwordEncoder.encode(rawCode)
   4) challenge = VerificationChallenge.issue(.., expiresAt = now + TTL)  저장
   5) publish VerificationIssuedEvent(challengeId, destination, rawCode)  // §8

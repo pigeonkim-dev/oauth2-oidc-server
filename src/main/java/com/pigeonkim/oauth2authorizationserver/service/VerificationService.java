@@ -29,6 +29,8 @@ public class VerificationService {
     private final Clock clock;
     private final ApplicationEventPublisher eventPublisher;
 
+    private static final int CODE_LENGTH = 8;
+
     @Transactional
     public void issue(Account account, VerificationChannel channel, VerificationPurpose purpose, String destination) {
         // 정책1: 기존 PENDING 폐기
@@ -103,8 +105,8 @@ public class VerificationService {
     private static final char[] ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789".toCharArray();
 
     private String generateCode() {
-        StringBuilder sb = new StringBuilder(6);
-        for (int i = 0; i < 18; i++) {
+        StringBuilder sb = new StringBuilder(CODE_LENGTH);
+        for (int i = 0; i < CODE_LENGTH; i++) {
             sb.append(ALPHABET[RANDOM.nextInt(ALPHABET.length)]);   // 모듈로 편향 없음
         }
         return sb.toString();
