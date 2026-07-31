@@ -61,7 +61,6 @@ public class ReuseDetectingRefreshTokenAuthenticationProvider implements Authent
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT);
         }
 
-
         // ── DELEGATE: 진짜 SAS provider 가 회전 수행 ─────────────
         Authentication result = this.delegate.authenticate(authentication);
 

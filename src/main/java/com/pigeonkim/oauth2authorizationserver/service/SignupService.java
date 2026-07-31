@@ -5,6 +5,7 @@ import com.pigeonkim.oauth2authorizationserver.domain.Credential;
 import com.pigeonkim.oauth2authorizationserver.domain.CredentialType;
 import com.pigeonkim.oauth2authorizationserver.domain.VerificationChannel;
 import com.pigeonkim.oauth2authorizationserver.domain.VerificationPurpose;
+import com.pigeonkim.oauth2authorizationserver.exception.DuplicateCredentialException;
 import com.pigeonkim.oauth2authorizationserver.repository.AccountRepository;
 import com.pigeonkim.oauth2authorizationserver.repository.CredentialRepository;
 
@@ -47,7 +48,7 @@ public class SignupService {
         if (credentialRepo
                 .existsByEmailAndType(email, CredentialType.EMAIL_PASSWORD)) {
 
-            throw new IllegalStateException("already registered");
+            throw new DuplicateCredentialException("already registered");
 
         }
 
