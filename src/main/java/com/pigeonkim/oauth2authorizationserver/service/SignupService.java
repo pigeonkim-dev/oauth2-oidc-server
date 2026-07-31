@@ -6,6 +6,7 @@ import com.pigeonkim.oauth2authorizationserver.domain.CredentialType;
 import com.pigeonkim.oauth2authorizationserver.domain.VerificationChannel;
 import com.pigeonkim.oauth2authorizationserver.domain.VerificationPurpose;
 import com.pigeonkim.oauth2authorizationserver.exception.DuplicateCredentialException;
+import com.pigeonkim.oauth2authorizationserver.exception.VerificationFailedException;
 import com.pigeonkim.oauth2authorizationserver.repository.AccountRepository;
 import com.pigeonkim.oauth2authorizationserver.repository.CredentialRepository;
 
@@ -68,8 +69,8 @@ public class SignupService {
     /**
      * 이메일 검증: email 로 account 를 찾아 코드 검증. 성공 시 credential.emailVerified=true.
      */
-    @Transactional
-    public boolean verifyEmail(String email, String code) {
+    @Transactional(noRollbackFor = VerificationFailedException.class)
+    public void verifyEmail(String email, String code) {
         // TODO:
         //  1) credentialRepo.findByEmailAndType(email, CredentialType.EMAIL_PASSWORD)
         //       비어있으면 return false  (이메일 존재 여부를 노출하지 않으려 '실패'로 통일)
@@ -77,17 +78,19 @@ public class SignupService {
         //  3) return verificationService.verify(account, VerificationChannel.EMAIL,
         //                                        VerificationPurpose.SIGNUP_VERIFY, code);
 
-        Optional<Credential> credential = credentialRepo.findByEmailAndType(email, CredentialType.EMAIL_PASSWORD);
+        Optional<Credential> credential = credentialRepo.
+                findByEmailAndType(email, CredentialType.EMAIL_PASSWORD);
 
         if (credential.isEmpty()) {
-            return false;
+            throw new VerificationFailedException("verification failed");   // ★
         }
 
         Account account = credential.get().getAccount();
-
-        return verificationService.verify(
-                account,
-                VerificationChannel.EMAIL,
+        boolean ok = verificationService.verify(account, VerificationChannel.EMAIL,
                 VerificationPurpose.SIGNUP_VERIFY, code);
+
+        if (!ok) {
+            throw new VerificationFailedException("verification failed");   // ★ 위와 '똑같은 메시지'
+        }
     }
 }

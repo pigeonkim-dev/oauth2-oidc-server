@@ -23,11 +23,9 @@ public class SignupController {
         return ResponseEntity.accepted().build();          // 202: 접수됨(이메일 검증 대기)
     }
 
-    // POST /api/signup/verify-email
     @PostMapping("/verify-email")
     public ResponseEntity<Void> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
-        boolean ok = signupService.verifyEmail(request.email(), request.code());
-        return ok ? ResponseEntity.ok().build()            // 200: 검증 성공
-                : ResponseEntity.badRequest().build();   // 400: 실패
+        signupService.verifyEmail(request.email(), request.code());
+        return ResponseEntity.ok().build();   // 실패는 예외 → advice가 400 + ErrorResponse
     }
 }

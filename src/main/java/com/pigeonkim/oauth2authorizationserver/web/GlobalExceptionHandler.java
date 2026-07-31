@@ -4,6 +4,7 @@ import com.pigeonkim.oauth2authorizationserver.dto.ErrorResponse;
 import com.pigeonkim.oauth2authorizationserver.exception.DuplicateCredentialException;
 import com.pigeonkim.oauth2authorizationserver.exception.LinkRefusedException;
 
+import com.pigeonkim.oauth2authorizationserver.exception.VerificationFailedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -83,5 +84,12 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(body);
+    }
+    @ExceptionHandler(VerificationFailedException.class)
+    public ResponseEntity<ErrorResponse> handleVerificationFailed(VerificationFailedException ex) {
+        // TODO: handleDuplicate 처럼, 단 HttpStatus.BAD_REQUEST(400)로
+
+        ErrorResponse body = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 }
