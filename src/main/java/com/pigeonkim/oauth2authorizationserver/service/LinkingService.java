@@ -28,7 +28,7 @@ public class LinkingService {
 
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = LinkRefusedException.class)
     public void confirmLink(String existingEmail, String linkCode, PendingKakaoCredential proven) {
 
         Credential credential = credentialRepo.findByEmailAndType(
