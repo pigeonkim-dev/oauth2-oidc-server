@@ -16,16 +16,15 @@ public class SignupController {
 
     private final SignupService signupService;
 
-    // POST /api/signup
     @PostMapping
     public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest request) {
         signupService.signup(request.email(), request.password(), request.displayName());
-        return ResponseEntity.accepted().build();          // 202: 접수됨(이메일 검증 대기)
+        return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/verify-email")
     public ResponseEntity<Void> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         signupService.verifyEmail(request.email(), request.code());
-        return ResponseEntity.ok().build();   // 실패는 예외 → advice가 400 + ErrorResponse
+        return ResponseEntity.ok().build();
     }
 }

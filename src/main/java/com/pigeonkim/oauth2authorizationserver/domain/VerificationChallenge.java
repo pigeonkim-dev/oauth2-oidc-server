@@ -82,16 +82,16 @@ public class VerificationChallenge {
         return attemptCount >= MAX_ATTEMPTS;
     }
 
-   public void consume(Instant now) {
+    public void consume(Instant now) {
 
-       if (this.status != VerificationStatus.PENDING)
-           throw new IllegalStateException("not consumable: " + status);
+        if (this.status != VerificationStatus.PENDING)
+            throw new IllegalStateException("not consumable: " + status);
 
-       if (!now.isBefore(expiresAt))
-           throw new IllegalStateException("challenge expired");
+        if (!now.isBefore(expiresAt))
+            throw new IllegalStateException("challenge expired");
 
-       this.status = VerificationStatus.CONSUMED;
-       this.consumedAt = now;
+        this.status = VerificationStatus.CONSUMED;
+        this.consumedAt = now;
     }
 
     public void recordFailure(Instant now) {
@@ -111,12 +111,12 @@ public class VerificationChallenge {
         if (!(o instanceof VerificationChallenge other))
             return false;
 
-        return id != null && id.equals(other.id);   // id 없으면 동일성(==)만 인정
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();   // 상수 — id 변해도 hashCode 불변 보장
+        return getClass().hashCode();
     }
 
 }

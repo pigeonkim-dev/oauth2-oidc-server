@@ -2,6 +2,7 @@ package com.pigeonkim.oauth2authorizationserver.service;
 
 import com.pigeonkim.oauth2authorizationserver.domain.JpaOAuth2Authorization;
 import com.pigeonkim.oauth2authorizationserver.repository.JpaOAuth2AuthorizationRepository;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.jackson.SecurityJacksonModules;
@@ -31,41 +32,41 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 
     private final JpaOAuth2AuthorizationRepository repository;
     private final RegisteredClientRepository registeredClientRepository;
-    private final JsonMapper jsonMapper;   // tools.jackson.databind.json.JsonMapper (Jackson 3!)
+    private final JsonMapper jsonMapper;
 
     public JpaOAuth2AuthorizationService(JpaOAuth2AuthorizationRepository repository,
                                          RegisteredClientRepository registeredClientRepository) {
         this.repository = repository;
         this.registeredClientRepository = registeredClientRepository;
-        // ★ 함정 방지: 평범한 ObjectMapper 쓰면 SAS 보안타입 직렬화가 터짐.
-        //   SAS가 쓰는 것과 동일한 보안 모듈 등록.
+
         List<JacksonModule> modules =
                 SecurityJacksonModules.getModules(getClass().getClassLoader());
         this.jsonMapper = JsonMapper.builder().addModules(modules).build();
     }
 
-    // ───────── 인터페이스 4메서드 ─────────
     @Override
-    public void save(OAuth2Authorization authorization) {
+    public void save(@NonNull OAuth2Authorization authorization) {
         Assert.notNull(authorization, "authorization cannot be null");
         repository.save(toEntity(authorization));   // save = insert or update (같은 PK면 갱신)
     }
 
     @Override
-    public void remove(OAuth2Authorization authorization) {
+    public void remove(@NonNull OAuth2Authorization authorization) {
         Assert.notNull(authorization, "authorization cannot be null");
         repository.deleteById(authorization.getId());
     }
 
     @Override
-    public OAuth2Authorization findById(String id) {
+    public OAuth2Authorization findById(@NonNull String id) {
         Assert.hasText(id, "id cannot be empty");
         return repository.findById(id).map(this::toObject).orElse(null);
     }
 
     @Override
-    public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
+    public OAuth2Authorization findByToken(@NonNull String token, OAuth2TokenType tokenType) {
+
         Assert.hasText(token, "token cannot be empty");
+
         Optional<JpaOAuth2Authorization> result;
         if (tokenType == null) {
             result = repository.findByAnyToken(token);
@@ -82,10 +83,10 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
         } else {
             result = Optional.empty();
         }
+
         return result.map(this::toObject).orElse(null);
     }
 
-    // ───────── 변환: 쓰기 (SAS객체 → 엔티티) ─────────
     private JpaOAuth2Authorization toEntity(OAuth2Authorization oAuth2Authorization) {
         JpaOAuth2Authorization jpaOAuth2Authorization = new JpaOAuth2Authorization();
         jpaOAuth2Authorization.setId(oAuth2Authorization.getId());
@@ -94,9 +95,8 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
         jpaOAuth2Authorization.setAuthorizationGrantType(oAuth2Authorization.getAuthorizationGrantType().getValue());
         jpaOAuth2Authorization.setAuthorizedScopes(StringUtils.collectionToDelimitedString(oAuth2Authorization.getAuthorizedScopes(), ","));
         jpaOAuth2Authorization.setAttributes(writeMap(oAuth2Authorization.getAttributes()));
-        jpaOAuth2Authorization.setState(oAuth2Authorization.getAttribute(OAuth2ParameterNames.STATE));   // state는 attributes 안에 들어있음
+        jpaOAuth2Authorization.setState(oAuth2Authorization.getAttribute(OAuth2ParameterNames.STATE));
 
-        // ── 패턴 예시: authorization_code 블록 (이건 제가 채움) ──
         OAuth2Authorization.Token<OAuth2AuthorizationCode> code = oAuth2Authorization.getToken(OAuth2AuthorizationCode.class);
         if (code != null) {
             jpaOAuth2Authorization.setAuthorizationCodeValue(code.getToken().getTokenValue());
@@ -120,8 +120,8 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
             jpaOAuth2Authorization.setAccessTokenMetadata(writeMap(accessToken.getMetadata()));
         }
 
-       OAuth2Authorization.Token<OAuth2RefreshToken> refreshToken = oAuth2Authorization.getRefreshToken();
-        if (refreshToken != null){
+        OAuth2Authorization.Token<OAuth2RefreshToken> refreshToken = oAuth2Authorization.getRefreshToken();
+        if (refreshToken != null) {
             jpaOAuth2Authorization.setRefreshTokenValue(refreshToken.getToken().getTokenValue());
             jpaOAuth2Authorization.setRefreshTokenIssuedAt(refreshToken.getToken().getIssuedAt());
             jpaOAuth2Authorization.setRefreshTokenExpiresAt(refreshToken.getToken().getExpiresAt());
@@ -139,8 +139,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
         return jpaOAuth2Authorization;
     }
 
-    // ───────── 변환: 읽기 (엔티티 → SAS객체) ─────────
-    private OAuth2Authorization toObject(JpaOAuth2Authorization  jpaOAuth2Authorization) {
+    private OAuth2Authorization toObject(JpaOAuth2Authorization jpaOAuth2Authorization) {
 
         RegisteredClient rc = registeredClientRepository.findById(jpaOAuth2Authorization.getRegisteredClientId());
         if (rc == null) {
@@ -159,7 +158,6 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
             oatuh2AuthorizationBuilder.attribute(OAuth2ParameterNames.STATE, jpaOAuth2Authorization.getState());
         }
 
-        // ── 패턴 예시: authorization_code 블록 (제가 채움) ──
         if (StringUtils.hasText(jpaOAuth2Authorization.getAuthorizationCodeValue())) {
             OAuth2AuthorizationCode code = new OAuth2AuthorizationCode(
                     jpaOAuth2Authorization.getAuthorizationCodeValue(),
@@ -176,7 +174,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
                     jpaOAuth2Authorization.getAccessTokenIssuedAt(),
                     jpaOAuth2Authorization.getAccessTokenExpiresAt(),
                     StringUtils.commaDelimitedListToSet(jpaOAuth2Authorization.getAccessTokenScopes())
-                    );
+            );
 
             oatuh2AuthorizationBuilder.token(accessToken,
                     md -> md.putAll(parseMap(jpaOAuth2Authorization.getAccessTokenMetadata())));
@@ -209,17 +207,22 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
         return oatuh2AuthorizationBuilder.build();
     }
 
-    // ───────── JSON 헬퍼 (제가 채움) ─────────
     private String writeMap(Map<String, Object> data) {
-        try { return jsonMapper.writeValueAsString(data); }
-        catch (Exception ex) { throw new IllegalArgumentException(ex.getMessage(), ex); }
+        try {
+            return jsonMapper.writeValueAsString(data);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(ex.getMessage(), ex);
+        }
     }
 
     private Map<String, Object> parseMap(String data) {
         if (!StringUtils.hasText(data)) return Collections.emptyMap();
         try {
-            var typeRef = new ParameterizedTypeReference<Map<String, Object>>() {};
+            var typeRef = new ParameterizedTypeReference<Map<String, Object>>() {
+            };
             return jsonMapper.readValue(data, jsonMapper.getTypeFactory().constructType(typeRef.getType()));
-        } catch (Exception ex) { throw new IllegalArgumentException(ex.getMessage(), ex); }
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(ex.getMessage(), ex);
+        }
     }
 }

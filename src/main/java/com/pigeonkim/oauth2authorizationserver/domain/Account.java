@@ -26,7 +26,7 @@ public class Account {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "account")     // ★ mappedBy 가 핵심
+    @OneToMany(mappedBy = "account")
     private List<Credential> credentials = new ArrayList<>();
 
     public  static  Account of(String displayName){

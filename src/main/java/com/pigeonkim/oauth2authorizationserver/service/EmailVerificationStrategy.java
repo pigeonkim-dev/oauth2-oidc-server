@@ -17,7 +17,6 @@ public class EmailVerificationStrategy implements VerificationStrategy {
 
     @Override
     public void send(String destination, String rawCode) {
-        // v1 dev 모드: SMTP 대신 로그 (운영 전 이 줄 제거 — TODO)
         log.info("[DEV] verification code to {} = {}", destination, rawCode);
     }
 }

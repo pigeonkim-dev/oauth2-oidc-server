@@ -18,9 +18,6 @@ public class LinkingService {
 
     @Transactional
     public void initiateLink(String existingEmail) {
-        // 1) existingEmail 의 EMAIL_PASSWORD credential 찾기
-        //    - 없거나 isEmailVerified()==false 면 throw new LinkRefusedException(...)
-        // 2) verificationService.issue(account, EMAIL, LINK, existingEmail)
 
         Credential credential = credentialRepo.findByEmailAndType(existingEmail, CredentialType.EMAIL_PASSWORD)
                 .filter(Credential::isEmailVerified)
@@ -33,11 +30,6 @@ public class LinkingService {
 
     @Transactional
     public void confirmLink(String existingEmail, String linkCode, PendingKakaoCredential proven) {
-        // 1) existingEmail 의 검증된 EMAIL_PASSWORD credential 찾기 → account 꺼내기
-        //    (없거나 미검증이면 LinkRefusedException)
-        // 2) verificationService.verify(account, EMAIL, LINK, linkCode)
-        //    - false 면 throw new LinkRefusedException(...)
-        // 3) [D3] 통과 시에만: credentialRepo.save(Credential.kakao(account, proven...))
 
         Credential credential = credentialRepo.findByEmailAndType(
                         existingEmail, CredentialType.EMAIL_PASSWORD)

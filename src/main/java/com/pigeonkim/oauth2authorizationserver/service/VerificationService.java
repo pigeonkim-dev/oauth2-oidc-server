@@ -33,7 +33,7 @@ public class VerificationService {
 
     @Transactional
     public void issue(Account account, VerificationChannel channel, VerificationPurpose purpose, String destination) {
-        // 정책1: 기존 PENDING 폐기
+
         challengeRepo.findByAccountAndChannelAndPurposeAndStatus(account, channel, purpose, VerificationStatus.PENDING)
                 .forEach(VerificationChallenge::supersede);
 
@@ -60,14 +60,12 @@ public class VerificationService {
 
         VerificationChallenge latest = pending.get(0);
 
-        // 과거 PENDING(레이스로 남은 것들)은 검증 전에 즉시 폐기 — "최신만 유효"
         pending.stream()
                 .skip(1)
                 .forEach(VerificationChallenge::supersede);
 
         Instant now = now();
 
-        // 잠금 먼저: isUsable 이 !isLocked 를 포함하므로 순서가 중요(반대면 이 블록은 dead code)
         if (latest.isLocked()) {
             latest.supersede();
             return false;
@@ -75,7 +73,6 @@ public class VerificationService {
         if (!latest.isUsable(now))
             return false;
 
-        // 1초 throttle — 너무 빠른 재시도는 횟수 안 깎고 거부
         if (latest.getLastAttemptAt() != null
                 && Duration.between(latest.getLastAttemptAt(), now).compareTo(MIN_INTERVAL) < 0)
             return false;
@@ -94,14 +91,12 @@ public class VerificationService {
 
         return true;
     }
-    // §5 흐름: usable→lock→throttle→matches→consume(+emailVerified, 형제 supersede)
 
     private Instant now() {
         return clock.instant();
     }
 
     private static final SecureRandom RANDOM = new SecureRandom();
-    // 헷갈리는 문자(0/O, 1/I/L) 제외 → 입력 실수 줄임
     private static final char[] ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789".toCharArray();
 
     private String generateCode() {

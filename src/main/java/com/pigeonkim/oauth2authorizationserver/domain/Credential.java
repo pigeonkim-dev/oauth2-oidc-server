@@ -58,7 +58,6 @@ public class Credential {
         this.providerUid = providerUid;
     }
 
-    // ✅ BASIC 전용 진입로 — passwordHash 강제, provider류는 못 넣음
     public static Credential basic(Account account, String email, String passwordHash) {
         if (passwordHash == null || passwordHash.isBlank())
             throw new IllegalArgumentException("EMAIL_PASSWORD requires passwordHash");
@@ -69,7 +68,6 @@ public class Credential {
         return new Credential(account, CredentialType.EMAIL_PASSWORD, email, passwordHash, null, null);
     }
 
-    // ✅ 소셜 로그인 공통 진입로 — provider/providerUid 강제, password는 못 넣음 (kakao/google/naver…)
     public static Credential oauth(Account account, String email, String provider, String providerUid) {
         if (provider == null || providerUid == null)
             throw new IllegalArgumentException("OAUTH requires provider and providerUid");
@@ -81,9 +79,9 @@ public class Credential {
         if (type == null) return false;
         return switch (type) {
             case EMAIL_PASSWORD -> email != null && passwordHash != null
-                    && provider == null && providerUid == null;   // BASIC은 email=식별자라 필수
+                    && provider == null && providerUid == null;
             case OAUTH -> providerUid != null && provider != null
-                    && passwordHash == null;                       // 소셜은 email 선택 → 조건 없음
+                    && passwordHash == null;
         };
     }
 
@@ -94,12 +92,12 @@ public class Credential {
         if (!(o instanceof Credential other))
             return false;
 
-        return id != null && id.equals(other.id);   // id 없으면 동일성(==)만 인정
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();   // 상수 — id 변해도 hashCode 불변 보장
+        return getClass().hashCode();
     }
 
     public void markEmailVerified() {

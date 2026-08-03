@@ -4,5 +4,6 @@ import com.pigeonkim.oauth2authorizationserver.domain.VerificationChannel;
 
 public interface VerificationStrategy {
     VerificationChannel channel();
+
     void send(String destination, String rawCode);
 }

@@ -16,7 +16,6 @@ public class VerificationSendListener {
     private final Map<VerificationChannel, VerificationStrategy> strategies;
 
     public VerificationSendListener(List<VerificationStrategy> list) {
-        // 스프링이 전략 3개(EMAIL/KAKAO_MSG/SMS)를 List로 주입 → channel() 키로 Map 구성
         this.strategies = list.stream()
                 .collect(Collectors.toMap(VerificationStrategy::channel, Function.identity()));
     }
