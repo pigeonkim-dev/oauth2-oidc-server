@@ -1,6 +1,6 @@
-package com.pigeonkim.oauth2authorizationserver.web;
+package com.pigeonkim.oauth2authorizationserver.web.handler;
 
-import com.pigeonkim.oauth2authorizationserver.dto.ErrorResponse;
+import com.pigeonkim.oauth2authorizationserver.web.dto.ErrorResponse;
 import com.pigeonkim.oauth2authorizationserver.exception.DuplicateCredentialException;
 import com.pigeonkim.oauth2authorizationserver.exception.LinkRefusedException;
 

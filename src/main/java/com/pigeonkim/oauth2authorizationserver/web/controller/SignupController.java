@@ -1,7 +1,7 @@
-package com.pigeonkim.oauth2authorizationserver.web;
+package com.pigeonkim.oauth2authorizationserver.web.controller;
 
-import com.pigeonkim.oauth2authorizationserver.dto.SignupRequest;
-import com.pigeonkim.oauth2authorizationserver.dto.VerifyEmailRequest;
+import com.pigeonkim.oauth2authorizationserver.web.dto.SignupRequest;
+import com.pigeonkim.oauth2authorizationserver.web.dto.VerifyEmailRequest;
 import com.pigeonkim.oauth2authorizationserver.service.SignupService;
 
 import jakarta.validation.Valid;

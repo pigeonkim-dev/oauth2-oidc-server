@@ -39,7 +39,7 @@ The single source of truth for design is **`docs/`** — start with [`docs/00-ov
 
 ## Architecture & cross-cutting invariants
 
-Layered packages under the base package: `config, domain, repository, service, web, dto, exception`. `web/` and `dto/` are not built yet.
+Layered packages under the base package: `config, domain, repository, service, web, exception`. **`web/` is split into subpackages** (reorganized 2026-08-03): `web/controller` (@RestControllers), `web/handler` (`@RestControllerAdvice` `GlobalExceptionHandler` + Spring Security success handlers like `KakaoLoginSuccessHandler`), and `web/dto` (request/response records — the old top-level `dto/` package was moved here; `PendingKakaoCredential` stays in `service/` as it's in-flight state, not a web DTO).
 
 These invariants span multiple files and the design docs — **do not break them**:
 

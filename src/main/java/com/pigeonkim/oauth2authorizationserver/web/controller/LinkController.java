@@ -1,7 +1,7 @@
-package com.pigeonkim.oauth2authorizationserver.web;
+package com.pigeonkim.oauth2authorizationserver.web.controller;
 
-import com.pigeonkim.oauth2authorizationserver.dto.LinkConfirmRequest;
-import com.pigeonkim.oauth2authorizationserver.dto.LinkInitiateRequest;
+import com.pigeonkim.oauth2authorizationserver.web.dto.LinkConfirmRequest;
+import com.pigeonkim.oauth2authorizationserver.web.dto.LinkInitiateRequest;
 import com.pigeonkim.oauth2authorizationserver.exception.LinkRefusedException;
 import com.pigeonkim.oauth2authorizationserver.service.LinkingService;
 import com.pigeonkim.oauth2authorizationserver.service.PendingKakaoCredential;

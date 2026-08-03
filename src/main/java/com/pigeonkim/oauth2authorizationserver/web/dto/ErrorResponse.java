@@ -1,4 +1,4 @@
-package com.pigeonkim.oauth2authorizationserver.dto;
+package com.pigeonkim.oauth2authorizationserver.web.dto;
 
 import java.util.Map;
 

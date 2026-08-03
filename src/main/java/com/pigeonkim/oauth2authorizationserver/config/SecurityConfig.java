@@ -9,6 +9,7 @@ import com.pigeonkim.oauth2authorizationserver.repository.AccountRepository;
 import com.pigeonkim.oauth2authorizationserver.repository.JpaOAuth2AuthorizationRepository;
 import com.pigeonkim.oauth2authorizationserver.service.JpaOAuth2AuthorizationService;
 import com.pigeonkim.oauth2authorizationserver.service.RefreshTokenService;
+import com.pigeonkim.oauth2authorizationserver.web.handler.KakaoLoginSuccessHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -89,7 +90,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, KakaoLoginSuccessHandler kakaoLoginSuccessHandler)
             throws Exception {
         http
                 .authorizeHttpRequests(a ->
@@ -97,7 +98,8 @@ public class SecurityConfig {
                                 .anyRequest().authenticated())
                 .csrf(c -> c.ignoringRequestMatchers("/api/**"))
                 .formLogin(Customizer.withDefaults()) // 기본 로그인 폼
-                .oauth2Login(Customizer.withDefaults());
+                .oauth2Login(o -> o.successHandler(kakaoLoginSuccessHandler));
+
         return http.build();
     }
 
