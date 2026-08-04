@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
         uniqueConstraints = {
                 @UniqueConstraint(name = "uq_credential_type_email", columnNames = {"type", "email"}),
                 @UniqueConstraint(name = "uq_credential_provider", columnNames = {"provider", "provider_uid"})
+        },
+        indexes = {
+                @Index(name = "idx_credential_account", columnList = "account_id")
         })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

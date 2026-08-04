@@ -6,7 +6,11 @@ import lombok.Getter;
 import java.time.Instant;
 
 @Entity
-@Table(name = "refresh_token")
+@Table(name = "refresh_token",
+        indexes = {
+                @Index(name = "idx_rt_family", columnList = "family_id"),
+                @Index(name = "idx_rt_expires", columnList = "expires_at")
+        })
 @Getter
 public class RefreshToken {
 
