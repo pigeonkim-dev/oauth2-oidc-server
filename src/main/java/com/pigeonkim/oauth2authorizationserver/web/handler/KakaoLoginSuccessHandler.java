@@ -64,6 +64,6 @@ public class KakaoLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         PendingKakaoCredential proven = new PendingKakaoCredential(provider, providerUid, null);
         request.getSession().setAttribute(LinkController.PENDING_KAKAO_ATTR, proven);
-        response.sendRedirect("/link-choice");
+        response.sendRedirect("/link-choice.html");
     }
 }
