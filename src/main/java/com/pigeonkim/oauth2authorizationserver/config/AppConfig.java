@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.Clock;
 
 @Configuration
+@EnableScheduling
 public class AppConfig {
     @Bean
     public Clock clock() {
