@@ -201,7 +201,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
                     claims);
 
             oatuh2AuthorizationBuilder.token(oidcIdToken,
-                    m -> md.putAll(md));
+                    m -> m.putAll(md));
         }
 
         return oatuh2AuthorizationBuilder.build();

@@ -5,7 +5,10 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.pigeonkim.oauth2authorizationserver.domain.Credential;
+import com.pigeonkim.oauth2authorizationserver.domain.CredentialType;
 import com.pigeonkim.oauth2authorizationserver.repository.AccountRepository;
+import com.pigeonkim.oauth2authorizationserver.repository.CredentialRepository;
 import com.pigeonkim.oauth2authorizationserver.repository.JpaOAuth2AuthorizationRepository;
 import com.pigeonkim.oauth2authorizationserver.service.JpaOAuth2AuthorizationService;
 import com.pigeonkim.oauth2authorizationserver.service.RefreshTokenService;
@@ -19,9 +22,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -37,7 +37,6 @@ import org.springframework.security.oauth2.server.authorization.settings.ClientS
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -109,16 +108,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
-        UserDetails user = User.withUsername("user")
-                .password(encoder.encode("/"))
-                .roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    @Bean
-    public RegisteredClientRepository registeredClientRepository() {
+    public RegisteredClientRepository registeredClientRepository(PasswordEncoder passwordEncoder) {
         RegisteredClient client = RegisteredClient.withId("11111111-1111-1111-1111-111111111111")
                 .clientId("demo-client")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
@@ -135,7 +125,21 @@ public class SecurityConfig {
                         .reuseRefreshTokens(false)
                         .build())
                 .build();
-        return new InMemoryRegisteredClientRepository(client);
+
+        RegisteredClient confidentialClient = RegisteredClient.withId("22222222-2222-2222-2222-222222222222")
+                .clientId("board-client")
+                .clientSecret(passwordEncoder.encode("board-secret"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .redirectUri("http://127.0.0.1:3000/callback")
+                .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
+                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                .tokenSettings(TokenSettings.builder().reuseRefreshTokens(false).build())
+                .build();
+
+        return new InMemoryRegisteredClientRepository(client, confidentialClient);
     }
 
     @Bean
@@ -162,22 +166,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer(AccountRepository accountRepository) {
+    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer(CredentialRepository credentialRepo) {
         return context -> {
 
             if (!OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
                 return;
             }
 
-            Long accountId = null;
-            if (accountId == null) {
-                return;
-            }
+            String email = context.getPrincipal().getName();
 
-            accountRepository.findWithCredentialsById(accountId).ifPresent(account -> {
-                context.getClaims().claim("name", account.getDisplayName());
-                context.getClaims().claim("account_id", account.getId());
-            });
+            credentialRepo.findWithAccountByEmailAndType(email, CredentialType.EMAIL_PASSWORD)
+                    .map(Credential::getAccount)
+                    .ifPresent(account -> {
+                        context.getClaims().claim("name", account.getDisplayName());
+                        context.getClaims().claim("account_id", account.getId().toString());
+                    });
         };
     }
 
