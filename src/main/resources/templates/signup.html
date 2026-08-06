@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입 — OAuth2 IdP</title>
+    <style>
+        body { max-width: 420px; margin: 48px auto; font-family: system-ui, sans-serif; padding: 0 16px; }
+        h1 { font-size: 22px; }
+        form { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
+        label { font-size: 13px; color: #444; display: block; margin-bottom: 4px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        input.field-error { border-color: #d33; }
+        .err { color: #d33; font-size: 12px; margin-top: 4px; }
+        .global-err { background: #fdecea; color: #a1160a; padding: 10px 12px; border-radius: 6px; font-size: 13px; }
+        button { padding: 11px; border: 0; border-radius: 6px; background: #2b6; color: #fff; font-size: 15px; cursor: pointer; }
+        .sns { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+        .sns a { text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: #333; font-size: 14px; }
+        .divider { text-align: center; color: #999; font-size: 12px; margin: 22px 0 4px; }
+        .foot { margin-top: 20px; font-size: 13px; text-align: center; }
+        a { color: #06c; }
+    </style>
+</head>
+<body>
+<h1>회원가입</h1>
+
+<!-- th:action="@{/signup}" 를 쓰면 Spring Security의 CSRF 토큰 hidden input 이 자동 주입된다 -->
+<form th:action="@{/signup}" th:object="${signupForm}" method="post">
+    <!-- 전역 에러(예: 이미 가입된 이메일). #fields 는 th:object 폼 '안'에서만 동작하므로 form 내부에 둔다 -->
+    <div class="global-err" th:if="${#fields.hasGlobalErrors()}">
+        <p th:each="e : ${#fields.globalErrors()}" th:text="${e}">전역 에러</p>
+    </div>
+
+    <div>
+        <label for="email">이메일</label>
+        <input id="email" type="email" th:field="*{email}"
+               th:classappend="${#fields.hasErrors('email')} ? 'field-error'"
+               placeholder="you@example.com">
+        <div class="err" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">이메일 에러</div>
+    </div>
+
+    <div>
+        <label for="password">비밀번호</label>
+        <input id="password" type="password" th:field="*{password}"
+               th:classappend="${#fields.hasErrors('password')} ? 'field-error'"
+               placeholder="8자 이상">
+        <div class="err" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">비밀번호 에러</div>
+    </div>
+
+    <div>
+        <label for="displayName">표시 이름</label>
+        <input id="displayName" type="text" th:field="*{displayName}"
+               th:classappend="${#fields.hasErrors('displayName')} ? 'field-error'"
+               placeholder="다른 사용자에게 보일 이름">
+        <div class="err" th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}">이름 에러</div>
+    </div>
+
+    <button type="submit">가입하고 인증메일 받기</button>
+</form>
+
+<div class="divider">또는 소셜 계정으로</div>
+<div class="sns">
+    <!-- 카카오는 이미 배선됨. 구글은 슬라이스에서 registration 추가 예정(지금 누르면 미설정) -->
+    <a th:href="@{/oauth2/authorization/google}">Google로 계속하기</a>
+    <a th:href="@{/oauth2/authorization/kakao}">Kakao로 계속하기</a>
+</div>
+
+<div class="foot">
+    이미 계정이 있나요? <a th:href="@{/login}">로그인</a>
+</div>
+</body>
+</html>

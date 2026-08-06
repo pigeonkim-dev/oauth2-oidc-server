@@ -6,7 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A **central-account Identity Provider (IdP)** built on **Spring Authorization Server (SAS)**. The thesis of the project is to hand-build the seams SAS leaves blank: the **Account/Credential domain, account linking, channel verification, and refresh-token reuse detection**. Treat it as production code (it is private for reuse, not a throwaway portfolio).
 
-The single source of truth for design is **`docs/`** — start with [`docs/00-overview-design.md`](docs/00-overview-design.md) (master index: build order, locked decisions, full data model, per-task design docs, security backlog). Per-feature docs (`t1`..`t8`) carry the rationale and the locked invariants; read the relevant one before touching that area.
+The single source of truth for **per-feature technical design** is **`docs/`** — start with [`docs/00-overview-design.md`](docs/00-overview-design.md) (master index: build order, locked decisions, full data model, per-task design docs, security backlog). Per-feature docs (`t1`..`t8`) carry the rationale and the locked invariants; read the relevant one before touching that area.
+
+**V2 planning / strategy / cross-session decisions live in `../plan/`** (a sibling non-git folder — the design & decision log for this project). Before starting V2 work, read, in order:
+- `../plan/v2-implementation-plan.md` — the V2 build plan (UI-driven vertical slices: signup → edit/settings-linking → withdrawal), slice-by-slice tasks, start order, completion criteria, plan-eng-review report.
+- `../plan/v2-email-identity-design.md` — identity model spec (email = one login method per address; signup-conflict handling; logged-in settings-linking via magic link; Google+Kakao providers; withdrawal).
+- `../plan/CLAUDE.md` — the **decision log = single source of truth for decisions** (security stance, SMTP real-send, deploy scope, completion criteria). If docs conflict, `../plan/CLAUDE.md` wins.
+
+Absolute path: `/Users/redtiger/life/job/dev/private-pruduct/OAuth2-SpringAuthorizationServer/plan/`.
 
 ## Stack quirks (will bite if forgotten)
 

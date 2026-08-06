@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 — OAuth2 IdP</title>
+    <style>
+        body { max-width: 420px; margin: 48px auto; font-family: system-ui, sans-serif; padding: 0 16px; }
+        h1 { font-size: 22px; }
+        form { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
+        label { font-size: 13px; color: #444; display: block; margin-bottom: 4px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        button { padding: 11px; border: 0; border-radius: 6px; background: #2b6; color: #fff; font-size: 15px; cursor: pointer; }
+        .msg { padding: 10px 12px; border-radius: 6px; font-size: 13px; }
+        .msg.error { background: #fdecea; color: #a1160a; }
+        .msg.ok { background: #eafaf0; color: #1a7f45; }
+        .sns { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+        .sns a { text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: #333; font-size: 14px; }
+        .divider { text-align: center; color: #999; font-size: 12px; margin: 22px 0 4px; }
+        .foot { margin-top: 20px; font-size: 13px; text-align: center; }
+        a { color: #06c; }
+    </style>
+</head>
+<body>
+<h1>로그인</h1>
+
+<!-- Spring Security 는 인증 실패 시 ?error, 로그아웃 시 ?logout 파라미터를 붙여 이 페이지로 되돌린다 -->
+<div class="msg error" th:if="${param.error}">이메일 또는 비밀번호가 올바르지 않습니다.</div>
+<div class="msg ok" th:if="${param.logout}">로그아웃되었습니다.</div>
+
+<!-- th:action 으로 CSRF 토큰 자동 주입. 필드명 username/password 는 시큐리티 기본값 -->
+<form th:action="@{/login}" method="post">
+    <div>
+        <label for="username">이메일</label>
+        <input id="username" name="username" type="email" autocomplete="username" placeholder="you@example.com">
+    </div>
+    <div>
+        <label for="password">비밀번호</label>
+        <input id="password" name="password" type="password" autocomplete="current-password">
+    </div>
+    <button type="submit">로그인</button>
+</form>
+
+<div class="divider">또는 소셜 계정으로</div>
+<div class="sns">
+    <a th:href="@{/oauth2/authorization/google}">Google로 계속하기</a>
+    <a th:href="@{/oauth2/authorization/kakao}">Kakao로 계속하기</a>
+</div>
+
+<div class="foot">
+    계정이 없나요? <a th:href="@{/signup}">회원가입</a>
+</div>
+</body>
+</html>

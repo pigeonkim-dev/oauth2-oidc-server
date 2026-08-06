@@ -10,9 +10,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
-import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationToken;
+
+import java.util.Objects;
 
 
 public class ReuseDetectingRefreshTokenAuthenticationProvider implements AuthenticationProvider {
@@ -44,7 +45,7 @@ public class ReuseDetectingRefreshTokenAuthenticationProvider implements Authent
 
         OAuth2AccessTokenAuthenticationToken accessTokenResult = (OAuth2AccessTokenAuthenticationToken) result;
 
-        OAuth2RefreshToken refreshTokenToken = accessTokenResult.getRefreshToken();
+        OAuth2RefreshToken refreshTokenToken = Objects.requireNonNull(accessTokenResult).getRefreshToken();
 
         if (refreshTokenToken != null) {
             refreshTokenService.rotate(presentedValue,
@@ -55,7 +56,7 @@ public class ReuseDetectingRefreshTokenAuthenticationProvider implements Authent
     }
 
     @Override
-    public boolean supports(Class<?> authentication) {
+    public boolean supports(@NonNull Class<?> authentication) {
 
         return this.delegate.supports(authentication);
     }

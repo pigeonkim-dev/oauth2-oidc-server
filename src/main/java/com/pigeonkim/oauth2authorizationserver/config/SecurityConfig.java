@@ -94,9 +94,11 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(a ->
                         a.requestMatchers("/api/signup/**").permitAll()
+                                .requestMatchers("/signup", "/signup/**").permitAll() // 가입 화면(Thymeleaf)은 비로그인 공개
+                                .requestMatchers("/error").permitAll() // 서버 에러(500) 페이지가 인증에 막혀 /login 으로 둔갑하는 것 방지
                                 .anyRequest().authenticated())
                 .csrf(c -> c.ignoringRequestMatchers("/api/**"))
-                .formLogin(Customizer.withDefaults()) // 기본 로그인 폼
+                .formLogin(form -> form.loginPage("/login").permitAll()) // 커스텀 로그인 화면(GET /login), 인증처리 POST /login 은 시큐리티가 담당
                 .oauth2Login(o -> o.successHandler(kakaoLoginSuccessHandler));
 
         return http.build();
