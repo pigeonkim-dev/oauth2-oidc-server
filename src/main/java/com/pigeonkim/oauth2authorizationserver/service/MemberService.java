@@ -17,9 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+/**
+ * 회원(Account+Credential 애그리거트) 라이프사이클 애플리케이션 서비스.
+ *
+ * 회원 유스케이스를 담는다 — 지금은 가입(signup)/이메일 검증(verifyEmail), 이후 P3 에서 수정/탈퇴 추가.
+ * 한 동작이 Account 와 Credential 두 엔티티를 함께 다루므로 엔티티별 서비스가 아니라 이 애그리거트 서비스에 모은다.
+ */
 @Service
 @RequiredArgsConstructor
-public class SignupService {
+public class MemberService {
 
     private final AccountRepository accountRepo;
     private final CredentialRepository credentialRepo;
@@ -65,5 +71,7 @@ public class SignupService {
         if (!ok) {
             throw new VerificationFailedException("verification failed");
         }
+
+        account.activate();
     }
 }

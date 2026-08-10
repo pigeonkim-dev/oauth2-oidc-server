@@ -1,5 +1,7 @@
 package com.pigeonkim.oauth2authorizationserver.service;
 
+import com.pigeonkim.oauth2authorizationserver.domain.Account;
+import com.pigeonkim.oauth2authorizationserver.domain.AccountStatus;
 import com.pigeonkim.oauth2authorizationserver.domain.Credential;
 import com.pigeonkim.oauth2authorizationserver.domain.CredentialType;
 import com.pigeonkim.oauth2authorizationserver.repository.CredentialRepository;
@@ -21,16 +23,19 @@ public class CredentialUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<Credential> credential = credentialRepo.findByEmailAndType(email, CredentialType.EMAIL_PASSWORD);
+        Optional<Credential> credential = credentialRepo
+                .findWithAccountByEmailAndType(email, CredentialType.EMAIL_PASSWORD);
 
         if (credential.isEmpty()) {
             throw new UsernameNotFoundException("not found");
         }
 
+        Account account = credential.get().getAccount();
+
         return User.withUsername(credential.get().getEmail())
                 .password(credential.get().getPasswordHash())
-                .authorities("ROLE_USER")
-                .disabled(!credential.get().isEmailVerified())
+                .authorities(account.getRole().name())
+                .disabled(account.getStatus() != AccountStatus.ACTIVE)
                 .build();
     }
 }

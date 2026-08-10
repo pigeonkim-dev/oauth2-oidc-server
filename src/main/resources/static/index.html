@@ -3,29 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>OAuth2 IdP — 홈</title>
-    <style>
-        body { max-width: 480px; margin: 60px auto; font-family: system-ui, sans-serif; text-align: center; }
-        #status { margin-top: 24px; font-size: 18px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-        b { color: #2b6; }
-        a { color: #06c; }
-    </style>
+    <link href="/css/home.css" rel="stylesheet">
 </head>
 <body>
 <h1>OAuth2 IdP 데모</h1>
 <div id="status">확인 중…</div>
 
-<script>
-    // 같은 출처(8080)라 세션 쿠키가 자동으로 실림 → 서버가 '지금 로그인한 사람'을 알 수 있음
-    fetch('/api/me')
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(me => {
-            document.getElementById('status').innerHTML =
-                '✅ 로그인됨 — <b>' + me.email + '</b> 님 환영합니다';
-        })
-        .catch(() => {
-            document.getElementById('status').innerHTML =
-                '로그인 안 됨 — <a href="/login">로그인하러 가기</a>';
-        });
-</script>
+<script src="/js/home.js"></script>
 </body>
 </html>

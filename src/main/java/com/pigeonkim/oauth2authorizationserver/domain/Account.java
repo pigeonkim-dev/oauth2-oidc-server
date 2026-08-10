@@ -57,10 +57,6 @@ public class Account {
     public static Account of(String displayName) {
         Account account = new Account();
         account.displayName = displayName;
-        // TODO: 신규 가입 기본값 설정
-        //   account.role   = Role.ROLE_USER;
-        //   account.status = AccountStatus.PENDING;   // 이메일 검증 전 반쪽 계정
-
         account.role = Role.ROLE_USER;
         account.status = AccountStatus.PENDING;
         return account;
@@ -72,8 +68,15 @@ public class Account {
      * 서비스가 hasher.hash(phone) 로 idx 를 계산해 phone 과 idx 를 '둘 다' 넘겨준다 — 여기선 저장만.
      */
     public void changePhone(String phoneNumber, String phoneIdx) {
-        // TODO: 두 필드에 대입
         this.phoneNumber = phoneNumber;
         this.phoneIdx = phoneIdx;
+    }
+
+    /**
+     * 이메일 검증 완료 시 호출: PENDING → ACTIVE.
+     * MemberService.verifyEmail 이 검증 성공 후 부른다.
+     */
+    public void activate() {
+        this.status = AccountStatus.ACTIVE;
     }
 }

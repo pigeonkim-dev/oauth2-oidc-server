@@ -1,0 +1,14 @@
+body { max-width: 420px; margin: 48px auto; font-family: system-ui, sans-serif; padding: 0 16px; }
+h1 { font-size: 22px; }
+form { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
+label { font-size: 13px; color: #444; display: block; margin-bottom: 4px; }
+input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+input.field-error { border-color: #d33; }
+.err { color: #d33; font-size: 12px; margin-top: 4px; }
+.global-err { background: #fdecea; color: #a1160a; padding: 10px 12px; border-radius: 6px; font-size: 13px; }
+button { padding: 11px; border: 0; border-radius: 6px; background: #2b6; color: #fff; font-size: 15px; cursor: pointer; }
+.sns { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+.sns a { text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: #333; font-size: 14px; }
+.divider { text-align: center; color: #999; font-size: 12px; margin: 22px 0 4px; }
+.foot { margin-top: 20px; font-size: 13px; text-align: center; }
+a { color: #06c; }

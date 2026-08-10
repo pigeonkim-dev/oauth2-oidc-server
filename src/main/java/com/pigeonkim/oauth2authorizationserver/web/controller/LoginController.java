@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  * (SecurityConfig 의 formLogin().loginPage("/login") 이 이 경로를 로그인 페이지로 지정한다.)
  */
 @Controller
-public class LoginPageController {
+public class LoginController {
 
     @GetMapping("/login")
     public String login() {
