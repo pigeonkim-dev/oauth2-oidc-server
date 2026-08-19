@@ -83,14 +83,15 @@ public class MemberController {
     @PostMapping("/signup/verify")
     public String verify(@RequestParam String email,
                          @RequestParam String code,
-                         Model model) {
+                         Model model,
+                         RedirectAttributes redirectAttributes) {
         try{
             memberService.verifyEmail(email, code);
         } catch (VerificationFailedException e){
-            model.addAttribute("verifyError", "인증에 실패 했습니다. 코드를 다시 확인 하세요.");
-            model.addAttribute("email", email);
+            redirectAttributes.addFlashAttribute("verifyError", "인증에 실패 했습니다. 코드를 다시 확인 하세요.");
+            redirectAttributes.addFlashAttribute("email", email);
 
-            return "check-email";
+            return "redirect:/signup/check-email";
         }
 
         return "redirect:/login?verified";

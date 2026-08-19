@@ -62,20 +62,11 @@ public class Account {
         return account;
     }
 
-    /**
-     * 전화번호 설정/변경.
-     * blind index 는 엔티티가 만들지 않는다(BlindIndexHasher 는 Spring 빈, 엔티티는 순수 도메인 유지).
-     * 서비스가 hasher.hash(phone) 로 idx 를 계산해 phone 과 idx 를 '둘 다' 넘겨준다 — 여기선 저장만.
-     */
     public void changePhone(String phoneNumber, String phoneIdx) {
         this.phoneNumber = phoneNumber;
         this.phoneIdx = phoneIdx;
     }
 
-    /**
-     * 이메일 검증 완료 시 호출: PENDING → ACTIVE.
-     * MemberService.verifyEmail 이 검증 성공 후 부른다.
-     */
     public void activate() {
         this.status = AccountStatus.ACTIVE;
     }

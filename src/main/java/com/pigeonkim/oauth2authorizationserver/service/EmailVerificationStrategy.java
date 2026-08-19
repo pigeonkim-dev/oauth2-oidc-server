@@ -12,6 +12,7 @@ public class EmailVerificationStrategy implements VerificationStrategy {
 
     @Override
     public VerificationChannel channel() {
+
         return VerificationChannel.EMAIL;
     }
 

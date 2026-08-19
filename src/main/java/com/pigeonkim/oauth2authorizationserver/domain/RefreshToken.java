@@ -55,6 +55,7 @@ public class RefreshToken {
     }
 
     public void revoke() {
+
         this.status = RefreshTokenStatus.REVOKED;
     }
 }

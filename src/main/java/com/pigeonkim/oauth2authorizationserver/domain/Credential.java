@@ -100,10 +100,12 @@ public class Credential {
 
     @Override
     public int hashCode() {
+
         return getClass().hashCode();
     }
 
     public void markEmailVerified() {
+
         this.emailVerified = true;
     }
 }

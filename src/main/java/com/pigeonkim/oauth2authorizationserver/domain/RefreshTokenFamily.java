@@ -36,6 +36,7 @@ public class RefreshTokenFamily {
     }
 
     public void revoke() {
+
         this.status = RefreshTokenFamilyStatus.REVOKED;
     }
 }
