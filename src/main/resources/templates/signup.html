@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>회원가입 — OAuth2 IdP</title>
+    <link rel="icon" th:href="@{/favicon.svg}" type="image/svg+xml">
     <link th:href="@{/css/signup.css}" rel="stylesheet">
 </head>
 <body>
@@ -32,6 +33,15 @@
     </div>
 
     <div>
+        <label for="confirmPassword">비밀번호 확인</label>
+        <input id="confirmPassword" type="password" th:field="*{confirmPassword}"
+               th:classappend="${#fields.hasErrors('confirmPassword') or #fields.hasErrors('passwordConfirmed')} ? 'field-error'"
+               placeholder="비밀번호 다시 입력">
+        <div class="err" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">확인 에러</div>
+        <div class="err" th:if="${#fields.hasErrors('passwordConfirmed')}" th:errors="*{passwordConfirmed}">불일치 에러</div>
+    </div>
+
+    <div>
         <label for="displayName">표시 이름</label>
         <input id="displayName" type="text" th:field="*{displayName}"
                th:classappend="${#fields.hasErrors('displayName')} ? 'field-error'"
@@ -52,5 +62,7 @@
 <div class="foot">
     이미 계정이 있나요? <a th:href="@{/login}">로그인</a>
 </div>
+
+<script th:src="@{/js/signup.js}"></script>
 </body>
 </html>
