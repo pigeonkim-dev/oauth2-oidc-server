@@ -38,6 +38,10 @@ dependencies {
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation 'org.springframework.boot:spring-boot-flyway'
 
+	// Spring Session JDBC — 세션을 톰캣 메모리가 아니라 DB 에 둔다 (수평 확장이 기본 원칙).
+	// 세션 테이블 스키마는 Spring Session 이 직접 관리한다 (Flyway 로 편입하지 않음).
+	implementation 'org.springframework.boot:spring-boot-session-jdbc'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'

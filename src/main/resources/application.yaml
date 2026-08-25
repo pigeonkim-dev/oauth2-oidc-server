@@ -26,6 +26,24 @@ spring:
     # 우리는 DB 를 비우고 V1 부터 새로 쌓기로 했으므로(결정 1-b) 필요 없다.
     # 켜두면 실수로 스키마가 남아 있는 DB에서 V1 을 건너뛰고도 정상으로 보여 위험하다.
 
+  session:
+    # 세션을 톰캣 메모리가 아니라 DB 에 둔다.
+    # 이래야 (1) 수평 확장이 되고 (2) 강제 로그아웃 때 남의 세션을 끊을 수 있다.
+    store-type: jdbc
+
+    # 마지막 요청 이후 10분간 아무 요청이 없으면 만료 (절대시간 아님).
+    # 기본 30분에서 줄였다 — IdP 성격상 짧은 쪽이 맞다.
+    timeout: 10m
+
+    jdbc:
+      # ⚠️ 기본값은 embedded — H2 같은 임베디드 DB 에서만 테이블을 만든다.
+      #    Postgres 는 embedded 가 아니므로 기본값이면 테이블이 안 생기고
+      #    "relation SPRING_SESSION does not exist" 로 죽는다.
+      # 세션 테이블은 Flyway 로 편입하지 않고 Spring Session 이 직접 관리한다(결정 b).
+      # 내부적으로 CREATE TABLE IF NOT EXISTS 라 매 기동마다 돌아도 안전하다.
+      # 단 운영에서는 앱 DB 계정이 DDL 권한을 계속 가져야 한다 → 배포(P5) 때 재검토.
+      initialize-schema: always
+
 logging:
   level:
     org.hibernate.SQL: debug  # 생성되는 SQL 눈으로 확인용
