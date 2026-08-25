@@ -5,11 +5,28 @@ spring:
     default: local            # 로컬 개발 기본 프로필 → application-local.yml 로드
   jpa:
     hibernate:
-      ddl-auto: update        # dev: 엔티티 → 테이블 자동 생성 (운영은 Flyway로 교체 예정)
+      # 스키마의 주인이 Flyway 로 넘어갔다. Hibernate 는 만들지도 고치지도 않고 '검사만' 한다.
+      # 엔티티와 실제 테이블이 안 맞으면 기동이 실패한다 → 스키마 드리프트를 즉시 잡아준다.
+      # ⚠️ update 로 되돌리지 말 것. update 는 컬럼/제약을 절대 지우지 못해서 Phase 0 이 불가능하다.
+      ddl-auto: validate
     open-in-view: false       # OSIV 끔(권장)
     properties:
       hibernate:
         format_sql: true
+
+  flyway:
+    enabled: true
+    # 기본값과 같지만 명시해 둔다 — 마이그레이션 파일은 여기에만 둔다.
+    locations: classpath:db/migration
+    # 파일명 규칙: V<버전>__<설명>.sql  (V + 숫자 + 언더바 2개 + 설명)
+    # 예) V1__baseline.sql, V2__spring_session.sql
+    #
+    # baseline-on-migrate 는 켜지 않는다.
+    # "이미 있는 DB에 Flyway 를 나중에 붙일 때" 쓰는 옵션인데,
+    # 우리는 DB 를 비우고 V1 부터 새로 쌓기로 했으므로(결정 1-b) 필요 없다.
+    # 켜두면 실수로 스키마가 남아 있는 DB에서 V1 을 건너뛰고도 정상으로 보여 위험하다.
+
 logging:
   level:
     org.hibernate.SQL: debug  # 생성되는 SQL 눈으로 확인용
+    org.flywaydb: info        # 어떤 마이그레이션이 적용됐는지 기동 로그로 확인
