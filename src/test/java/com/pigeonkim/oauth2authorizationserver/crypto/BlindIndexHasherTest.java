@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Test;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.Normalizer;
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * BlindIndexHasher 단위 테스트 (Spring 없이 plain JUnit).
@@ -32,32 +31,39 @@ class BlindIndexHasherTest {
     }
 
     @Test
-    void 같은_번호는_항상_같은_인덱스() {
-        String result1 = hasher.hash("010-1234-5678");
-        String result2 = hasher.hash("010-1234-5678");
+    void 자모분리형과_완성형은_같은_인덱스() {
 
-        assertEquals(result1, result2);
+        String NFDName = hasher.hash(IndexedField.NAME, Normalizer.normalize("김승기", Normalizer.Form.NFD));
+        String NFCName = hasher.hash(IndexedField.NAME, "김승기");
+
+        assertEquals(NFDName, NFCName);
+
     }
 
     @Test
-    void 포맷이_달라도_같은_번호면_같은_인덱스_정규화() {
+    void 이메일은_대소문자와_공백이_달라도_같은_인덱스() {
 
-        String result1 = hasher.hash("010-1234-5678");
-        String result2 = hasher.hash("01012345678");
+        String Email1 = hasher.hash(IndexedField.EMAIL, "Test@test.com");
+        String Email2 = hasher.hash(IndexedField.EMAIL, "test@test.com");
 
-        assertEquals(result1, result2);
+        assertEquals(Email1, Email2);
+
     }
 
     @Test
-    void 다른_번호는_다른_인덱스() {
-        String result1 = hasher.hash("010-1234-5678");
-        String result2 = hasher.hash("010-1234-5679");
+    void 도메인_분리_다른해시() {
 
-        assertNotEquals(result1, result2);
+        String phone = hasher.hash(IndexedField.PHONE, "01012345678");
+        String email = hasher.hash(IndexedField.EMAIL, "01012345678");
+
+        assertNotEquals(phone, email);
     }
 
     @Test
-    void null_은_null() {
-        assertNull(hasher.hash(null));
+    void 전화번호에_숫자가_없으면_예외() {
+
+        assertThrows(IllegalArgumentException.class,
+                () -> hasher.hash(IndexedField.PHONE, "abc"));
     }
+
 }
