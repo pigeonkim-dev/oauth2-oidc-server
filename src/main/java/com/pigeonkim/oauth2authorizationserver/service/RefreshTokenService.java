@@ -42,7 +42,7 @@ public class RefreshTokenService {
         return refreshToken;
     }
 
-    @Transactional(noRollbackFor = RefreshTokenReuseException.class)   // ← 아래 ★설명 꼭 읽기
+    @Transactional(noRollbackFor = RefreshTokenReuseException.class)
     public RefreshToken rotate(String presentedJti, String newJti, Instant newExpiresAt) {
 
         RefreshToken presented = tokenRepo.findById(presentedJti)
