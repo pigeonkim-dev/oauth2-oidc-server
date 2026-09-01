@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 계정 — OAuth2 IdP</title>
+    <link rel="icon" th:href="@{/favicon.svg}" type="image/svg+xml">
+    <link th:href="@{/css/me.css}" rel="stylesheet">
+</head>
+<body>
+
+<div class="header">
+    <h1>내 계정</h1>
+
+    <!-- 로그아웃은 반드시 POST. GET 으로 두면 <img src="/logout"> 만으로도 남을 로그아웃시킬 수 있다.
+         th:action 을 쓰면 CSRF 토큰 hidden input 이 자동으로 들어간다.
+         POST /logout 은 스프링 시큐리티가 기본으로 처리한다 (SecurityConfig 에 따로 안 적어도 동작). -->
+    <form th:action="@{/logout}" method="post" class="logout-form">
+        <button type="submit">로그아웃</button>
+    </form>
+</div>
+
+<dl class="profile">
+    <dt>이메일</dt>
+    <dd th:text="${me.email}">you@example.com</dd>
+
+    <dt>이름</dt>
+    <dd th:text="${me.displayName}">홍길동</dd>
+
+    <dt>전화번호</dt>
+    <dd th:text="${me.phoneNumber} ?: '등록된 번호가 없습니다'">010-0000-0000</dd>
+</dl>
+
+<!-- 아직 만들지 않은 화면들. 지금은 자리만 잡아둔다. -->
+<div class="actions">
+    <button type="button" disabled>정보 수정</button>
+    <button type="button" disabled>회원 탈퇴</button>
+</div>
+
+</body>
+</html>

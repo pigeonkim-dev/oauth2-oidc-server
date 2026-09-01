@@ -3,10 +3,12 @@ package com.pigeonkim.oauth2authorizationserver.web.controller;
 import com.pigeonkim.oauth2authorizationserver.exception.DuplicateCredentialException;
 import com.pigeonkim.oauth2authorizationserver.exception.VerificationFailedException;
 import com.pigeonkim.oauth2authorizationserver.service.MemberService;
+import com.pigeonkim.oauth2authorizationserver.web.dto.MeDto;
 import com.pigeonkim.oauth2authorizationserver.web.dto.SignupForm;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,7 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * 회원 라이프사이클 "화면" 컨트롤러 (Thymeleaf MVC).
- *
+ * <p>
  * 회원이 보는 화면을 담당한다 — 지금은 가입(/signup), 이후 P3 에서 수정(/profile)·탈퇴(/withdraw) 추가.
  * (리뷰 A1: 화면은 MVC, 클라이언트용 REST 와 분리.) 서비스를 호출해 계정 생성 + 검증메일 발급을 수행한다.
  */
@@ -56,7 +58,7 @@ public class MemberController {
 
         try {
             memberService.signup(form.getEmail(), form.getPassword(), form.getDisplayName());
-        }catch (DuplicateCredentialException e){
+        } catch (DuplicateCredentialException e) {
             bindingResult.reject("duplicate", "이미 가입된 이메일입니다. 로그인하세요.");
 
             return "signup";
@@ -85,9 +87,9 @@ public class MemberController {
                          @RequestParam String code,
                          Model model,
                          RedirectAttributes redirectAttributes) {
-        try{
+        try {
             memberService.verifyEmail(email, code);
-        } catch (VerificationFailedException e){
+        } catch (VerificationFailedException e) {
             redirectAttributes.addFlashAttribute("verifyError", "인증에 실패 했습니다. 코드를 다시 확인 하세요.");
             redirectAttributes.addFlashAttribute("email", email);
 
@@ -95,5 +97,14 @@ public class MemberController {
         }
 
         return "redirect:/login?verified";
+    }
+
+    @GetMapping("/me")
+    public String me(Authentication authentication, Model model) {
+
+        MeDto me = memberService.me(authentication.getName());
+        model.addAttribute("me", me);
+
+        return "me";
     }
 }
