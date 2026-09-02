@@ -7,7 +7,7 @@ Spring Authorization Server 기반으로 자체 OAuth2/OIDC 인증서버를
 전 직장에서 OAuth2 Client(구글·페이스북 소셜 로그인)를 연동해봤고,
 서버 쪽을 직접 설계·구현해보기 위해 시작했습니다.
 
-## 핵심 설계 (프레임워크가 비워둔 이음새를 직접 설계)
+## 핵심 설계 (Spring-Authorization-Server 와 유저데이터 연결)
 - Account / Credential 분리 — Account=사람, Credential=증명수단 (단일 테이블 STI)
 - 채널-적합 증명 기반 링킹 — 검증 안 된 이메일 일치로 자동 연결 금지 (계정 선점 차단)
 - 리프레시 토큰 재사용 탐지 — 재사용 시 토큰 패밀리 전체 무효화
