@@ -9,8 +9,8 @@ Spring Authorization Server 기반으로 자체 OAuth2/OIDC 인증서버를
 
 ## 핵심 설계 (Spring-Authorization-Server 와 유저데이터 연결)
 - Account / Credential 분리 — Account=사람, Credential=증명수단 (단일 테이블 STI)
-- 채널-적합 증명 기반 링킹 — 검증 안 된 이메일 일치로 자동 연결 금지 (계정 선점 차단)
-- 리프레시 토큰 재사용 탐지 — 재사용 시 토큰 패밀리 전체 무효화
+- 검증 안 된 이메일 일치로 자동 연결 금지 (계정 선점 차단)
+- 리프레시 토큰 재사용 탐지 -> 재사용 시 토큰 패밀리 전체 무효화
 
 ## 기술 스택
 - Java 17 · Spring Boot · Spring Authorization Server · Spring Security
@@ -25,4 +25,5 @@ Spring Authorization Server 기반으로 자체 OAuth2/OIDC 인증서버를
 - [ ] 리프레시 토큰 재사용 탐지
 
 ## 개발 방식
-AI 코딩 도구(Claude Code)를 활용하되, 아키텍처·도메인 설계·검증은 직접 수행했습니다.
+- AI 코딩 도구(Claude Code)를 활용하되, 아키텍처·도메인 설계·검증은 직접 수행했습니다.
+- 코딩 도구는 스켈레톤만 지원 하고 코드는 직접 타이핑 하여 학습 중입니다.
