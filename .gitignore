@@ -11,6 +11,9 @@ application-secret.yaml
 application-local.yml
 application-local.yaml
 *.env
+keys/
+*.p12
+*.jks
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/

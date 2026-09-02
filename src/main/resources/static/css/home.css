@@ -1,0 +1,4 @@
+body { max-width: 480px; margin: 60px auto; font-family: system-ui, sans-serif; text-align: center; }
+#status { margin-top: 24px; font-size: 18px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+b { color: #2b6; }
+a { color: #06c; }

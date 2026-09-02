@@ -24,6 +24,24 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// Flyway — DB 스키마 버전관리. 이 시점부터 스키마의 주인은 Hibernate 가 아니라 Flyway 다.
+	// 세 개가 다 필요하다. 하나라도 빠지면 조용히 안 돌거나 기동에 실패한다.
+	//   1) flyway-core                : 엔진
+	//   2) flyway-database-postgresql : Postgres 방언. Flyway 10 부터 DB 별로 분리됨
+	//   3) spring-boot-flyway         : Boot 의 자동설정. ⚠️ Boot 4 에서 기술별 모듈로 쪼개짐
+	//      → 이게 없으면 flyway-core 가 클래스패스에 있어도 Boot 가 아무것도 안 한다
+	//        (로그도 안 남고 flyway_schema_history 도 안 생긴다)
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+	implementation 'org.springframework.boot:spring-boot-flyway'
+
+	// Spring Session JDBC — 세션을 톰캣 메모리가 아니라 DB 에 둔다 (수평 확장이 기본 원칙).
+	// 세션 테이블 스키마는 Spring Session 이 직접 관리한다 (Flyway 로 편입하지 않음).
+	implementation 'org.springframework.boot:spring-boot-session-jdbc'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'

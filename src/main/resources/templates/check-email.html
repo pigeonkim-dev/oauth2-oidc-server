@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>이메일 인증 — OAuth2 IdP</title>
+    <link rel="icon" th:href="@{/favicon.svg}" type="image/svg+xml">
+    <link th:href="@{/css/check-email.css}" rel="stylesheet">
+</head>
+<body>
+<h1>이메일 인증</h1>
+<div class="box">
+    가입하신 이메일로 인증 코드를 보냈습니다.<br>
+    아래에 이메일과 코드를 입력해 인증을 완료하세요.
+</div>
+
+<!-- 검증 실패 시 컨트롤러가 model 에 verifyError 를 담아 여기 표시 -->
+<div class="err" th:if="${verifyError}" th:text="${verifyError}">검증 에러</div>
+
+<!-- th:action 으로 CSRF 자동 주입. /signup/** 은 permitAll -->
+<form th:action="@{/signup/verify}" method="post">
+    <div>
+        <label for="email">이메일</label>
+        <input id="email" name="email" type="email" th:value="${email}" placeholder="가입한 이메일">
+    </div>
+    <div>
+        <label for="code">인증 코드</label>
+        <input id="code" name="code" type="text" placeholder="메일로 받은 코드">
+    </div>
+    <button type="submit">인증 완료</button>
+</form>
+
+<p class="hint">(개발 모드: 실제 메일 대신 서버 콘솔 로그에 인증 코드가 찍힙니다.)</p>
+<p class="back"><a th:href="@{/login}">로그인 화면으로</a></p>
+</body>
+</html>
