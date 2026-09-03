@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>홈 — OAuth2 IdP</title>
+    <link rel="icon" th:href="@{/favicon.svg}" type="image/svg+xml">
+    <link th:href="@{/css/layout.css}" rel="stylesheet">
+    <link th:href="@{/css/home.css}" rel="stylesheet">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<h1>홈</h1>
+<p class="lead">로그인되었습니다.</p>
+
+<nav class="menu">
+    <a th:href="@{/me}">내 정보</a>
+</nav>
+
+</body>
+</html>

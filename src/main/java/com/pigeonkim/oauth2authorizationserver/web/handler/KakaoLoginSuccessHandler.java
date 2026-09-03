@@ -8,6 +8,7 @@ import com.pigeonkim.oauth2authorizationserver.web.controller.LinkController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -24,6 +25,7 @@ import java.util.Optional;
  * - 신규 카카오면 → PendingKakaoCredential 을 '세션'에 저장(LinkController.confirm 이 읽는 자리) → 링크/신규 선택으로
  * ⚠️ 이메일로 자동 연결 금지(R1). 세션 저장까지만 하고, 연결은 사용자가 명시적으로.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class KakaoLoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -36,6 +38,9 @@ public class KakaoLoginSuccessHandler implements AuthenticationSuccessHandler {
                                         @NonNull Authentication authentication) throws IOException {
 
         OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
+
+        log.info("{}", token.getPrincipal().getAttributes());
+
         String provider = token.getAuthorizedClientRegistrationId();
         String providerUid = token.getPrincipal().getName();
 

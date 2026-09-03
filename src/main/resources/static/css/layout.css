@@ -1,0 +1,10 @@
+/* 상단 바 — fragments/header.html 전용. 헤더를 쓰는 화면은 이 파일을 같이 링크한다. */
+.app-header { display: flex; align-items: center; justify-content: space-between;
+              border-bottom: 1px solid #e5e5e5; padding-bottom: 12px; margin-bottom: 28px; }
+.app-header .brand { font-size: 15px; font-weight: 600; color: #222; text-decoration: none; }
+.app-header .brand:hover { text-decoration: underline; }
+
+.logout-form { margin: 0; }
+.logout-form button { background: none; border: 1px solid #ccc; border-radius: 4px;
+                      padding: 6px 12px; cursor: pointer; font-size: 13px; color: #555; }
+.logout-form button:hover { background: #f5f5f5; }

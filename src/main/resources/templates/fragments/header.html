@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 로그인 후 화면들이 공통으로 끼워 쓰는 상단 바.
+     쓰는 쪽: <div th:replace="~{fragments/header :: header}"></div> -->
+<div th:fragment="header" class="app-header">
+    <a class="brand" th:href="@{/}">OAuth2 IdP</a>
+
+    <form th:action="@{/logout}" method="post" class="logout-form">
+        <button type="submit">로그아웃</button>
+    </form>
+</div>
+
+</body>
+</html>

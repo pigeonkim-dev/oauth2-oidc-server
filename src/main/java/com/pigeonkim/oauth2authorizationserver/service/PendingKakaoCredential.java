@@ -1,4 +1,6 @@
 package com.pigeonkim.oauth2authorizationserver.service;
 
-public record PendingKakaoCredential(String provider, String providerUid, String email) {
+import java.io.Serializable;
+
+public record PendingKakaoCredential(String provider, String providerUid, String email) implements Serializable {
 }
